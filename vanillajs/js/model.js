@@ -59,6 +59,29 @@
 		}
 	};
 
+	/**
+	 * Updates a model by giving it an ID, data to update, and a callback to fire when
+	 * the update is complete.
+	 *
+	 * @param {number} id The id of the model to update
+	 * @param {object} data The properties to update and their new value
+	 * @param {function} callback The callback to fire when the update is complete.
+	 */
+	Model.prototype.update = function (id, data, callback) {
+		this.storage.save(data, callback, id);
+	};
+
+
+	/**
+	 * Removes a model from storage
+	 *
+	 * @param {number} id The ID of the model to remove
+	 * @param {function} callback The callback to fire when the removal is complete.
+	 */
+	Model.prototype.remove = function (id, callback) {
+		this.storage.remove(id, callback);
+	};
+
 	// Export to window
 	window.app = window.app || {};
 	window.app.Model = Model;

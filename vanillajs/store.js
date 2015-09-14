@@ -27,36 +27,6 @@
 	}
 
 	/**
-	 * Finds items based on a query given as a JS object
-	 *
-	 * @param {object} query The query to match against (i.e. {foo: 'bar'})
-	 * @param {function} callback	 The callback to fire when the query has
-	 * completed running
-	 *
-	 * @example
-	 * db.find({foo: 'bar', hello: 'world'}, function (data) {
-	 *	 // data will return any items that have foo: bar and
-	 *	 // hello: world in their properties
-	 * });
-	 */
-	Store.prototype.find = function (query, callback) {
-		if (!callback) {
-			return;
-		}
-
-		var todos = JSON.parse(localStorage[this._dbName]).todos;
-
-		callback.call(this, todos.filter(function (todo) {
-			for (var q in query) {
-				if (query[q] !== todo[q]) {
-					return false;
-				}
-			}
-			return true;
-		}));
-	};
-
-	/**
 	 * Will retrieve all data from the collection
 	 *
 	 * @param {function} callback The callback to fire upon retrieving data

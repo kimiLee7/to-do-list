@@ -17,6 +17,17 @@
 			self.addItem(title);
 		});
 
+		self.view.bind('itemRemove', function (item) {
+				self.removeItem(item.id);
+		});
+
+		self.view.bind('itemToggle', function (item) {
+			self.toggleComplete(item.id, item.completed);
+		});
+		self.view.bind('toggleAll', function (status) {
+			self.toggleAll(status.completed);
+		});
+
 	}
 
 
@@ -38,6 +49,22 @@
 	};
 
 	/**
+	 * By giving it an ID it'll find the DOM element matching that ID,
+	 * remove it from the DOM and also remove it from storage.
+	 *
+	 * @param {number} id The ID of the item to remove from the DOM and
+	 * storage
+	 */
+	Controller.prototype.removeItem = function (id) {
+		var self = this;
+		self.model.remove(id, function () {
+			self.view.render('removeItem', id);
+		});
+
+//		self._filter(true);
+	};
+
+	/**
 	 * Re-filters the todo items, based on the active route.
 	 * @param {boolean|undefined} force  forces a re-painting of todo items.
 	 */
@@ -50,7 +77,7 @@
 		// If the last active route isn't "All", or we're switching routes, we
 		// re-create the todo item elements, calling:
 		//   this.show[All|Active|Completed]();
-		if (force || this._lastActiveRoute !== 'All' || this._lastActiveRoute !== activeRoute) {
+		if (force) {
 			this['showAll']();
 		}
 
@@ -67,6 +94,44 @@
 		self.model.read(function (data) {
 			self.view.render('showEntries', data);
 		});
+	};
+
+	/**
+	 * Give it an ID of a model and a checkbox and it will update the item
+	 * in storage based on the checkbox's state.
+	 *
+	 * @param {number} id The ID of the element to complete or uncomplete
+	 * @param {object} checkbox The checkbox to check the state of complete
+	 *                          or not
+	 * @param {boolean|undefined} silent Prevent re-filtering the todo items
+	 */
+	Controller.prototype.toggleComplete = function (id, completed, silent) {
+		var self = this;
+		self.model.update(id, { completed: completed }, function () {
+			self.view.render('elementComplete', {
+				id: id,
+				completed: completed
+			});
+		});
+
+		if (!silent) {
+			self._filter();
+		}
+	};
+
+	/**
+	 * Will toggle ALL checkboxes' on/off state and completeness of models.
+	 * Just pass in the event object.
+	 */
+	Controller.prototype.toggleAll = function (completed) {
+		var self = this;
+		self.model.read({ completed: !completed }, function (data) {
+			data.forEach(function (item) {
+				self.toggleComplete(item.id, completed, true);
+			});
+		});
+
+		self._filter();
 	};
 
 	// Export to window
