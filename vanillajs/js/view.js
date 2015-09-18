@@ -21,6 +21,8 @@
 		this.$newTodo = qs('.new-todo');
 		this.$toggleAll = qs('.toggle-all');
 		this.$todoItemCounter = qs('.todo-count');
+		this.$footer = qs('.footer');
+		this.$clearCompleted = qs('.clear-completed');
 	}
 
 	View.prototype._removeItem = function (id) {
@@ -71,7 +73,17 @@
 			},
 			clearCompletedButton: function () {
 				self._clearCompletedButton(parameter.completed, parameter.visible);
+			},
+			toggleAll: function () {
+				self.$toggleAll.checked = parameter.checked;
+			},
+			contentBlockVisibility: function () {
+				self.$main.style.display = self.$footer.style.display = parameter.visible ? 'block' : 'none';
+			},
+			setFilter: function () {
+				self._setFilter(parameter);
 			}
+
 		};
 
 		viewCommands[viewCmd]();
@@ -127,8 +139,14 @@
 		}else if (event === 'itemEditDone') {
 			self._bindItemEditDone(handler);
 
-		} else if (event === 'itemEditCancel') {
+		}else if (event === 'itemEditCancel') {
 			self._bindItemEditCancel(handler);
+
+		}else if (event === 'removeCompleted') {
+			$on(self.$clearCompleted, 'click', function () {
+				handler();
+			});
+
 		}
 	};
 
@@ -185,6 +203,17 @@
 			label.textContent = title;
 		});
 	};
+
+	View.prototype._setFilter = function (currentPage) {
+		qs('.filters .selected').className = '';
+		qs('.filters [href="#/' + currentPage + '"]').className = 'selected';
+	};
+
+	View.prototype._clearCompletedButton = function (completedCount, visible) {
+		this.$clearCompleted.innerHTML = this.template.clearCompletedButton(completedCount);
+		this.$clearCompleted.style.display = visible ? 'block' : 'none';
+	};
+
 
 	// Export to window
 	window.app = window.app || {};

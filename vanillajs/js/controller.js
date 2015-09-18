@@ -25,6 +25,10 @@
 			self.toggleComplete(item.id, item.completed);
 		});
 
+		self.view.bind('removeCompleted', function () {
+			self.removeCompletedItems();
+		});
+
 		self.view.bind('toggleAll', function (status) {
 			self.toggleAll(status.completed);
 		});
@@ -78,6 +82,20 @@
 	};
 
 	/**
+	 * Will remove all completed items from the DOM and storage.
+	 */
+	Controller.prototype.removeCompletedItems = function () {
+		var self = this;
+		self.model.read({ completed: true }, function (data) {
+			data.forEach(function (item) {
+				self.removeItem(item.id);
+			});
+		});
+
+		self._filter();
+	};
+
+	/**
 	 * Updates the pieces of the page which change depending on the remaining
 	 * number of todos.
 	 */
@@ -85,13 +103,13 @@
 		var self = this;
 		self.model.getCount(function (todos) {
 			self.view.render('updateElementCount', todos.active);
-			/*self.view.render('clearCompletedButton', {
+			self.view.render('clearCompletedButton', {
 				completed: todos.completed,
 				visible: todos.completed > 0
 			});
 
 			self.view.render('toggleAll', {checked: todos.completed === todos.total});
-			self.view.render('contentBlockVisibility', {visible: todos.total > 0});*/
+			self.view.render('contentBlockVisibility', {visible: todos.total > 0});
 		});
 	};
 
@@ -108,11 +126,15 @@
 		// If the last active route isn't "All", or we're switching routes, we
 		// re-create the todo item elements, calling:
 		//   this.show[All|Active|Completed]();
-		if (force) {
+	/*	if (force) {
 			this['showAll']();
+		}*/
+
+		if (force || this._lastActiveRoute !== 'All' || this._lastActiveRoute !== activeRoute) {
+			this['show' + activeRoute]();
 		}
 
-		/*this._lastActiveRoute = activeRoute;*/
+		this._lastActiveRoute = activeRoute;
 	};
 
 	/**
@@ -134,6 +156,26 @@
 	Controller.prototype.showAll = function () {
 		var self = this;
 		self.model.read(function (data) {
+			self.view.render('showEntries', data);
+		});
+	};
+
+	/**
+	 * Renders all active tasks
+	 */
+	Controller.prototype.showActive = function () {
+		var self = this;
+		self.model.read({ completed: false }, function (data) {
+			self.view.render('showEntries', data);
+		});
+	};
+
+	/**
+	 * Renders all completed tasks
+	 */
+	Controller.prototype.showCompleted = function () {
+		var self = this;
+		self.model.read({ completed: true }, function (data) {
 			self.view.render('showEntries', data);
 		});
 	};
@@ -224,9 +266,9 @@
 			this._activeRoute = 'All';
 		}
 
-		this._filter(true);
+		this._filter();
 
-		/*this.view.render('setFilter', currentPage);*/
+		this.view.render('setFilter', currentPage);
 	};
 
 	// Export to window

@@ -93,19 +93,19 @@
 		return '<strong>' + activeTodos + '</strong> item' + plural + ' left';
 	};
 
-/*	/!**
+	/**
 	 * Updates the text within the "Clear completed" button
 	 *
 	 * @param  {[type]} completedTodos The number of completed todos.
 	 * @returns {string} String containing the count
-	 *!/
-	 Template.prototype.clearCompletedButton = function (completedTodos) {
-	 if (completedTodos > 0) {
-	 return 'Clear completed';
-	 } else {
-	 return '';
-	 }
-	 };*/
+	 */
+	Template.prototype.clearCompletedButton = function (completedTodos) {
+		if (completedTodos > 0) {
+			return 'Clear completed';
+		} else {
+			return '';
+		}
+	};
 
 	// Export to window
 	window.app = window.app || {};
