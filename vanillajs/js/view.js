@@ -14,12 +14,13 @@
 	 */
 	function View(template) {
 		this.template = template;
-//		this.ENTER_KEY = 13;
-//		this.ESCAPE_KEY = 27;
+		this.ENTER_KEY = 13;
+		this.ESCAPE_KEY = 27;
 		this.$todoList = qs('.todo-list');
-//		this.$main = qs('.main');
+		this.$main = qs('.main');
 		this.$newTodo = qs('.new-todo');
 		this.$toggleAll = qs('.toggle-all');
+		this.$todoItemCounter = qs('.todo-count');
 	}
 
 	View.prototype._removeItem = function (id) {
@@ -58,6 +59,18 @@
 			},
 			elementComplete: function () {
 				self._elementComplete(parameter.id, parameter.completed);
+			},
+			editItem: function () {
+				self._editItem(parameter.id, parameter.title);
+			},
+			editItemDone: function () {
+				self._editItemDone(parameter.id, parameter.title);
+			},
+			updateElementCount: function () {
+				self.$todoItemCounter.innerHTML = self.template.itemCounter(parameter);
+			},
+			clearCompletedButton: function () {
+				self._clearCompletedButton(parameter.completed, parameter.visible);
 			}
 		};
 
@@ -67,6 +80,18 @@
 	View.prototype._itemId = function (element) {
 		var li = $parent(element, 'li');
 		return parseInt(li.dataset.id, 10);
+	};
+
+	View.prototype._bindItemEditCancel = function (handler) {
+		var self = this;
+		$delegate(self.$todoList, 'li .edit', 'keyup', function (event) {
+			if (event.keyCode === self.ESCAPE_KEY) {
+				this.dataset.iscanceled = true;
+				this.blur();
+
+				handler({id: self._itemId(this)});
+			}
+		});
 	};
 
 	View.prototype.bind = function (event, handler) {
@@ -91,10 +116,74 @@
 
 		}else if (event === 'toggleAll') {
 			$on(self.$toggleAll, 'click', function () {
-				handler({completed: this.checked});
+				handler({completed: this.checked});     //when the event is fired,return this.checked = true;
 			});
 
+		}else if (event === 'itemEdit') {
+			$delegate(self.$todoList, 'li label', 'dblclick', function () {
+				handler({id: self._itemId(this)});
+			});
+
+		}else if (event === 'itemEditDone') {
+			self._bindItemEditDone(handler);
+
+		} else if (event === 'itemEditCancel') {
+			self._bindItemEditCancel(handler);
 		}
+	};
+
+	View.prototype._editItem = function (id, title) {
+		var listItem = qs('[data-id="' + id + '"]');
+
+		if (!listItem) {
+			return;
+		}
+
+		listItem.className = listItem.className + ' editing';
+
+		var input = document.createElement('input');
+		input.className = 'edit';
+
+		listItem.appendChild(input);
+		input.focus();
+		input.value = title;
+	};
+
+	View.prototype._bindItemEditDone = function (handler) {
+		var self = this;
+		$delegate(self.$todoList, 'li .edit', 'blur', function () {
+			if (!this.dataset.iscanceled) {
+				handler({
+					id: self._itemId(this),
+					title: this.value
+				});
+			}
+		});
+
+		$delegate(self.$todoList, 'li .edit', 'keypress', function (event) {
+			if (event.keyCode === self.ENTER_KEY) {
+				// Remove the cursor from the input when you hit enter just like if it
+				// were a real form
+				this.blur();
+			}
+		});
+	};
+
+	View.prototype._editItemDone = function (id, title) {
+		var listItem = qs('[data-id="' + id + '"]');
+
+		if (!listItem) {
+			return;
+		}
+
+		var input = qs('input.edit', listItem);
+		listItem.removeChild(input);
+
+		listItem.className = listItem.className.replace('editing', '');
+
+		qsa('label', listItem).forEach(function (label) {
+			label.textContent = title;
+		});
 	};
 
 	// Export to window

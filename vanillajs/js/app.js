@@ -15,11 +15,11 @@
 		this.controller = new app.Controller(this.model, this.view);
 	}
 
-	var todo = new Todo('demo1-todos-list');
+	var todo = new Todo('demo1-todos');
 
-	/*function setView() {
+	function setView() {
 	 todo.controller.setView(document.location.hash);
 	 }
 	 $on(window, 'load', setView);
-	 $on(window, 'hashchange', setView);*/
+//	 $on(window, 'hashchange', setView);
 })();

@@ -81,19 +81,19 @@
 		return view;
 	};
 
-/*	/!**
+	/**
 	 * Displays a counter of how many to dos are left to complete
 	 *
 	 * @param {number} activeTodos The number of active todos.
 	 * @returns {string} String containing the count
-	 *!/
+	 */
 	Template.prototype.itemCounter = function (activeTodos) {
 		var plural = activeTodos === 1 ? '' : 's';
 
 		return '<strong>' + activeTodos + '</strong> item' + plural + ' left';
-	};*/
+	};
 
-	/*/!**
+/*	/!**
 	 * Updates the text within the "Clear completed" button
 	 *
 	 * @param  {[type]} completedTodos The number of completed todos.

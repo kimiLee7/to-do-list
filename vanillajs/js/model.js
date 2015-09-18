@@ -82,6 +82,30 @@
 		this.storage.remove(id, callback);
 	};
 
+	/**
+	 * Returns a count of all todos
+	 */
+	Model.prototype.getCount = function (callback) {
+		var todos = {
+			active: 0,
+			completed: 0,
+			total: 0
+		};
+
+		this.storage.findAll(function (data) {
+			data.forEach(function (todo) {
+				if (todo.completed) {
+					todos.completed++;
+				} else {
+					todos.active++;
+				}
+
+				todos.total++;
+			});
+			callback(todos);
+		});
+	};
+
 	// Export to window
 	window.app = window.app || {};
 	window.app.Model = Model;
