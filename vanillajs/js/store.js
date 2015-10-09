@@ -32,8 +32,8 @@
 
 	// =======================================重写store==================================
 
-	function Store(name, category_name) {
-//		callback = callback || function () {};
+	function Store(name, category_name, callback) {
+		callback = callback || function () {};
 
 		this._dbName1 = name;
 		this._dbName2 = category_name;
@@ -47,7 +47,7 @@
 			localStorage[name] = JSON.stringify(todo_data);
 		}
 
-//		callback.call(this, JSON.parse(localStorage[name]), JSON.parse(localStorage[category_name]));
+		callback.call(this, JSON.parse(localStorage[name]), JSON.parse(localStorage[category_name]));
 	}
 
 
@@ -69,7 +69,7 @@
 			return;
 		}
 
-		var todos = JSON.parse(localStorage[this._dbName]).todos;
+		var todos = JSON.parse(localStorage[this._dbName1]).todos;
 
 		callback.call(this, todos.filter(function (todo) {
 			for (var q in query) {
@@ -86,10 +86,23 @@
 	 *
 	 * @param {function} callback The callback to fire upon retrieving data
 	 */
-	Store.prototype.findAll = function (callback) {
-		callback = callback || function () {};
-		callback.call(this, JSON.parse(localStorage[this._dbName]).todos);
+/*	Store.prototype.findAll = function (callback) {
+	 callback = callback || function () {};
+	 callback.call(this, JSON.parse(localStorage[this._dbName1]).todos);
+	 };*/
+
+	//================================重写findAll=====================
+	Store.prototype.findAll = function (category, callback) {
+		if (category == ''){
+			category = JSON.parse(localStorage[this._dbName2]).categories[0];
+			callback = callback || function () {};
+			callback.call(this, JSON.parse(localStorage[this._dbName1])[category]);
+		}else{
+			callback = callback || function () {};
+			callback.call(this, JSON.parse(localStorage[this._dbName1])[category]);
+		}
 	};
+
 
 	/**
 	 * Will save the given data to the DB. If no item exists it will create a new
@@ -99,10 +112,9 @@
 	 * @param {function} callback The callback to fire after saving
 	 * @param {number} id An optional param to enter an ID of an item to update
 	 */
-	Store.prototype.save = function (updateData, callback, id) {
-		var data = JSON.parse(localStorage[this._dbName]);
-		var todos = data.todos;
-
+	Store.prototype.save = function (category, updateData, callback, id) {
+		var data = JSON.parse(localStorage[this._dbName1]);
+		data[category] = data[category] || [];
 		callback = callback || function () {};
 
 		// If an ID was actually given, find the item and update each property
@@ -116,8 +128,8 @@
 				}
 			}
 
-			localStorage[this._dbName] = JSON.stringify(data);
-			callback.call(this, JSON.parse(localStorage[this._dbName]).todos);
+			localStorage[this._dbName1] = JSON.stringify(data);
+			callback.call(this, JSON.parse(localStorage[this._dbName1]).todos);
 		} else {
 			// Generate an ID
 			var full_time = new Date();
@@ -126,9 +138,10 @@
 			                     + (full_time.getMonth() + 1).toString() + "-"
 				                 + full_time.getDate().toString();
 			updateData.modified = "";
-			todos.push(updateData);
-			localStorage[this._dbName] = JSON.stringify(data);
-			callback.call(this, [updateData]);   //[updateData]是什么意思？？？这个参数存在的意义是？？？？
+			data[category].push(updateData);
+			localStorage[this._dbName1] = JSON.stringify(data);
+			callback.call(this);
+//			callback.call(this, [updateData]);   //[updateData]是什么意思？？？这个参数存在的意义是？？？？
 		}
 	};
 
@@ -139,7 +152,7 @@
 	 * @param {function} callback The callback to fire after saving
 	 */
 	Store.prototype.remove = function (id, callback) {
-		var data = JSON.parse(localStorage[this._dbName]);
+		var data = JSON.parse(localStorage[this._dbName1]);
 		var todos = data.todos;
 
 		for (var i = 0; i < todos.length; i++) {
@@ -149,14 +162,19 @@
 			}
 		}
 
-		localStorage[this._dbName] = JSON.stringify(data);
-		callback.call(this, JSON.parse(localStorage[this._dbName]).todos);
+		localStorage[this._dbName1] = JSON.stringify(data);
+		callback.call(this, JSON.parse(localStorage[this._dbName1]).todos);
 	};
 
 	//xiaomin
 	Store.prototype.readCategoryInfo = function (callback) {
 		callback = callback || function (){};
 		callback.call(this, JSON.parse(localStorage[this._dbName2]).categories);
+	};
+
+	Store.prototype.readFirstCategory = function (callback) {
+		callback = callback || function () {};
+		callback.call(this, JSON.parse(localStorage[this._dbName2]).categories[0] );
 	};
 
 

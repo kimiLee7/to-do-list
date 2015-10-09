@@ -17,8 +17,9 @@
 	 * @param {string} [title] The title of the task
 	 * @param {function} [callback] The callback to fire after the model is created
 	 */
-	Model.prototype.create = function (title, callback) {
+	Model.prototype.create = function (category, title, callback) {
 		title = title || '';
+		category = category || '';
 		callback = callback || function () {};
 
 		var newItem = {
@@ -26,7 +27,7 @@
 			completed: false
 		};
 
-		this.storage.save(newItem, callback);
+		this.storage.save(category, newItem, callback);
 	};
 
 	/**
@@ -44,13 +45,13 @@
 	 * //Below will find a model with foo equalling bar and hello equalling world.
 	 * model.read({ foo: 'bar', hello: 'world' });
 	 */
-	Model.prototype.read = function (query, callback) {
+	Model.prototype.read = function (category, query, callback) {
 		var queryType = typeof query;
 		callback = callback || function () {};
 
 		if (queryType === 'function') {
 			callback = query;
-			return this.storage.findAll(callback);
+			return this.storage.findAll(category, callback);
 		} else if (queryType === 'string' || queryType === 'number') {
 			query = parseInt(query, 10);
 			this.storage.find({ id: query }, callback);
@@ -111,7 +112,9 @@
 		this.storage.readCategoryInfo(callback);
 	};
 
-
+	Model.prototype.getFirstCategory = function (callback) {
+		this.storage.readFirstCategory(callback);
+	};
 
 	// Export to window
 	window.app = window.app || {};

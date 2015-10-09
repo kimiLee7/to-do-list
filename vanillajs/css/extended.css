@@ -69,12 +69,25 @@
     cursor: pointer;
 }
 
+.left_menu_list li a:link {
+    text-decoration: none;
+    color: #000;
+}
+
+.left_menu_list li a:visited {
+    text-decoration: none;
+    color: #000;
+}
+
 .left_menu_list li a:hover {
     background-color: #bfbfbf;
+    color: #000;
 }
 
 .left_menu_list li a:active {
     background-color: aquamarine;
+    text-decoration: none;
+    color: #000;
 }
 
 .left_menu_list li .title {
@@ -92,7 +105,7 @@
     line-height: 46px;
 }
 
-#show_list_name {
+#show_current_category {
     padding-left: 12px;
     font-size: 20px;
 }

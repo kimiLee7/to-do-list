@@ -25,6 +25,7 @@
 		this.$footer = qs('.footer');
 		this.$clearCompleted = qs('.clear-completed');
 		this.$left_menu_list = qs('.left_menu_list');
+		this.$current_category = qs('#show_current_category');
 	}
 
 	View.prototype._removeItem = function (id) {
@@ -93,7 +94,10 @@
 				qs('.show_time').style.display = 'none';
 			},
 			showLeftSideBar: function () {
-				self.$left_menu_list.innerHTML = self.category_template.returnCategoryTemplate(parameter);
+				self.$left_menu_list.innerHTML = self.category_template.show(parameter);
+			},
+			showCurrentCategory: function () {
+				self.$current_category.innerHTML = parameter;
 			}
 		};
 
@@ -245,6 +249,8 @@
 		qs('.show_time').innerHTML = this.template.timeFormat(created, modified);
 		qs('.show_time').style.display = 'block';
 	};
+
+
 
 	// Export to window
 	window.app = window.app || {};

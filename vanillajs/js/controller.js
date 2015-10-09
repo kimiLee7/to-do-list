@@ -64,9 +64,13 @@
 			return;
 		}
 
-		self.model.create(title, function () {
+		var locationHash = document.location.hash;
+		var category = locationHash.split('/')[2];
+
+		self.model.create(category, title, function () {
 			self.view.render('clearNewTodo');
-			self._filter(true);
+//			self._filter(true);
+			self.updateTodoContent(category);
 		});
 	};
 	/**
@@ -165,11 +169,15 @@
 	 *
 	 * @param {string} '' | 'active' | 'completed'
 	 */
-	Controller.prototype.setView = function (locationHash) {
-		var route = locationHash.split('/')[1];
-		var page = route || '';
-		this._updateFilterState(page);
-	};
+	/*
+
+	 Controller.prototype.setView = function (locationHash) {
+	 var route = locationHash.split('/')[1];
+	 var page = route || '';
+	 this._updateFilterState(page);
+	 };
+	 */
+
 
 	/**
 	 * An event to fire on load. Will get all items and display them in the
@@ -307,10 +315,46 @@
 	Controller.prototype.setLeftSideBar = function () {
 		var self = this;
 		self.model.getCategoryInfo(function (data) {
-			console.log(data);
 			self.view.render('showLeftSideBar', data);
 		})
 	};
+
+	Controller.prototype.setView = function (locationHash) {
+		var page;
+		var route1;
+		var route2;
+		if (locationHash == '') {
+		    page = '';
+			route1 = 'category';
+		} else {
+			route1 = locationHash.split('/')[1];
+			route2 = locationHash.split('/')[2];
+		    page = route2 || '';
+		}
+		if (route1 == 'category') {
+			this.showCurrentCategory(page);
+			this.updateTodoContent(page);
+		}
+	};
+
+	Controller.prototype.updateTodoContent = function (page) {
+		var self = this;
+		self.model.read(page, function(data) {
+			self.view.render('showEntries', data);
+		});
+	};
+
+	Controller.prototype.showCurrentCategory = function (category) {
+		var self = this;
+		if (category == '') {
+			self.model.getFirstCategory(function (data) {
+				self.view.render('showCurrentCategory', data);
+			});
+		} else {
+			self.view.render('showCurrentCategory', category);
+		}
+	};
+
 
 	// Export to window
 	window.app = window.app || {};
