@@ -1,0 +1,147 @@
+#left_side_bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 20%;
+    background-color: rgb(255, 255, 255);
+}
+
+#search_bar {
+    height: 46px;
+    width: 100%;
+    background-color: #af5b5e;
+    overflow: hidden;
+}
+
+#search_bar input {
+    margin-top: 10px;
+    height: 23px;
+    width:80%;
+    border: none;
+    background-color: transparent;
+    outline: none;
+    line-height: 23px;
+    font-size: 23px;
+    text-indent: 10px;
+}
+
+#search_bar img {
+    float: right;
+    margin-top: 10px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+#profile {
+    position: relative;
+}
+
+.profile_icon {
+    margin: 10px auto 5px 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+    background-color: aqua;
+}
+
+#profile span {
+    position: absolute;
+    left: 55px;
+    top: 5px;
+    font-size: 15px;
+}
+
+.left_menu_list {
+    margin: 0;
+    padding: 0;
+}
+
+.left_menu_list li {
+    list-style: none;
+}
+
+.left_menu_list li a{
+    display: block;
+    padding-left: 13px;
+    height: 45px;
+    line-height: 45px;
+    cursor: pointer;
+}
+
+.left_menu_list li a:hover {
+    background-color: #bfbfbf;
+}
+
+.left_menu_list li a:active {
+    background-color: aquamarine;
+}
+
+.left_menu_list li .title {
+    padding-left: 8px;
+}
+
+#top_menu_bar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 80%;
+    height: 46px;
+    background-color: #cc9a9a;
+    z-index: 10;
+    line-height: 46px;
+}
+
+#show_list_name {
+    padding-left: 12px;
+    font-size: 20px;
+}
+
+.top_menu_list {
+    float: right;
+    padding: 0;
+    margin: 0;
+}
+
+.top_menu_list li {
+    float: left;
+    position: relative;
+    margin-right: 20px;
+    list-style: none;
+    cursor: pointer;
+}
+
+.top_menu_list li span {
+    position: absolute;
+    left: 3px;
+    bottom: -5px;
+    font-size: 5px;
+}
+
+.todo-list li .mark {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 45px;
+    bottom: 0;
+    width: 40px;
+    height: 40px;
+    margin: auto 0;
+    margin-bottom: 11px;
+}
+
+.todo-list li:hover .mark {
+    display: block;
+}
+
+.todo-list li .mark:after {
+    content: '\2606';
+}
+
+
+
+
+
+
+
+

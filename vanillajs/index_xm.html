@@ -4,46 +4,95 @@
     <meta charset="utf-8">
     <title>VanillaJS • TodoMVC</title>
     <link rel="stylesheet" href="css/index-xm.css">
+    <link rel="stylesheet" href="css/extended.css">
 </head>
 <body>
-<section class="todoapp">
-    <header class="header">
-        <h1>todos</h1>
-        <input class="new-todo" placeholder="What needs to be done?" autofocus>
-    </header>
-    <section style="display: block;" class="main">
-        <input class="toggle-all" type="checkbox">
-        <label for="toggle-all">Mark all as complete</label>
-        <ul class="todo-list"></ul>
+    <div id="left_side_bar">
+        <div id="search_bar">
+            <input type="text">
+            <img src="images/search.png" width="25px" height="25px"/>
+        </div>
+        <div id="profile">
+            <div class="profile_icon"></div>
+            <span>xiaomin</span>
+        </div>
+        <ul class="left_menu_list">
+            <!--<li>
+                <a>
+                    <img src="images/mark_icon.png" alt="mark icon" width="20px" height="20px"/>
+                    <span class="title">Marked Tasks</span>
+                </a>
+            </li>-->
+<!--
+            <li>
+                <a>
+                    <img src="images/menu.png" alt="todo-list icon" width="20px" height="15px"/>
+                    <span class="title">Shopping List</span>
+                </a>
+            </li>
+            <li>
+                <a>
+                    <img src="images/menu.png" alt="todo-list icon" width="20px" height="15px"/>
+                    <span class="title">Travel</span>
+                </a>
+            </li>
+            <li>
+                <a>
+                    <img src="images/menu.png" alt="todo-list icon" width="20px" height="15px"/>
+                    <span class="title">Living</span>
+                </a>
+            </li>
+            -->
+        </ul>
+    </div>
+    <div id="top_menu_bar">
+        <span id="show_list_name">Marked Tasks</span>
+        <ul class="top_menu_list">
+            <li>
+                <img src="images/sort.png" alt="sort icon" width="30px" height="30px"/>
+                <span>Sort</span>
+            </li>
+        </ul>
+    </div>
+    <section class="todoapp">
+        <header class="header">
+            <h1>todos</h1>
+            <input class="new-todo" placeholder="What needs to be done?" autofocus>
+        </header>
+        <section style="display: block;" class="main">
+            <input class="toggle-all" type="checkbox">
+            <label for="toggle-all">Mark all as complete</label>
+            <ul class="todo-list"></ul>
+        </section>
+        <footer class="footer">
+            <span class="todo-count"></span>
+            <ul class="filters">
+                <li>
+                    <a href="#/" class="selected">All</a>
+                </li>
+                <li>
+                    <a href="#/active">Active</a>
+                </li>
+                <li>
+                    <a href="#/completed">Completed</a>
+                </li>
+            </ul>
+            <button class="clear-completed">Clear completed</button>
+            <!--
+            <footer class="info">
+                <p>Double-click to edit a todo</p>
+                <p>Created by <a href="http://twitter.com/oscargodson">Oscar Godson</a></p>
+                <p>Refactored by <a href="https://github.com/cburgmer">Christoph Burgmer</a></p>
+                <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+            </footer>
+            -->
+        </footer>
     </section>
-    <footer class="footer">
-        <span class="todo-count"></span>
-    <ul class="filters">
-        <li>
-            <a href="#/" class="selected">All</a>
-        </li>
-        <li>
-            <a href="#/active">Active</a>
-        </li>
-        <li>
-            <a href="#/completed">Completed</a>
-        </li>
-    </ul>
-    <button class="clear-completed">Clear completed</button>
-    </footer>
-</section>
-<footer class="info">
-    <p>Double-click to edit a todo</p>
-    <p>Created by <a href="http://twitter.com/oscargodson">Oscar Godson</a></p>
-    <p>Refactored by <a href="https://github.com/cburgmer">Christoph Burgmer</a></p>
-    <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
-</footer>
-
-</section>
     <script src="js/helpers.js"></script>
     <script src="js/store.js"></script>
     <script src="js/model.js"></script>
     <script src="js/template.js"></script>
+    <script src="js/category_template.js"></script>
     <script src="js/view.js"></script>
     <script src="js/controller.js"></script>
     <script src="js/app.js"></script>

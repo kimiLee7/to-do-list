@@ -106,6 +106,13 @@
 		});
 	};
 
+	//author xiaomin
+	Model.prototype.getCategoryInfo = function (callback) {
+		this.storage.readCategoryInfo(callback);
+	};
+
+
+
 	// Export to window
 	window.app = window.app || {};
 	window.app.Model = Model;

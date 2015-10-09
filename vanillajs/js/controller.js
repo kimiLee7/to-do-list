@@ -18,7 +18,16 @@
 		});
 
 		self.view.bind('itemRemove', function (item) {
-				self.removeItem(item.id);
+			self.removeItem(item.id);
+		});
+
+		self.view.bind("getTimeInfo", function(item) {
+			console.log(item.id);
+			self.showTimeInfo(item.id);
+		});
+
+		self.view.bind("getTimeInfoDone", function (item) {
+			self.hideTimeInfo(item.id);
 		});
 
 		self.view.bind('itemToggle', function (item) {
@@ -29,29 +38,25 @@
 			self.removeCompletedItems();
 		});
 
-		self.view.bind('toggleAll', function (status) {
-			self.toggleAll(status.completed);
-		});
-
 		self.view.bind('itemEdit', function (item) {
 			self.editItem(item.id);
 		});
 
 		self.view.bind('itemEditDone', function (item) {
-			self.editItemSave(item.id, item.title);
+			self.editItemSave(item.id, item.title, item.modified);
 		});
 
 		self.view.bind('itemEditCancel', function (item) {
 			self.editItemCancel(item.id);
 		});
+		self.view.bind('toggleAll', function (status) {
+			self.toggleAll(status.completed);
+		});
+
 
 	}
 
 
-	/**
-	 * An event to fire whenever you want to add an item. Simply pass in the event
-	 * object and it'll handle the DOM insertion and saving of the new item.
-	 */
 	Controller.prototype.addItem = function (title) {
 		var self = this;
 
@@ -64,7 +69,6 @@
 			self._filter(true);
 		});
 	};
-
 	/**
 	 * By giving it an ID it'll find the DOM element matching that ID,
 	 * remove it from the DOM and also remove it from storage.
@@ -79,6 +83,25 @@
 		});
 
 		self._filter();
+	};
+
+	Controller.prototype.showTimeInfo = function(id) {
+		var self = this;
+		self.model.read({id: id}, function (data) {
+			var remove_array_of_data = JSON.stringify(data[0]);
+			console.log(remove_array_of_data);
+			var be_json_data = JSON.parse(remove_array_of_data);
+			console.log(be_json_data.created);
+			self.view.render("showTimeInfo", {created:be_json_data.created, modified: be_json_data.modified});
+		});
+	};
+
+
+	Controller.prototype.hideTimeInfo = function (id) {
+		var self = this;
+		self.model.read({id:id}, function (data) {
+			self.view.render("hideTimeInfo");
+		})
 	};
 
 	/**
@@ -148,7 +171,6 @@
 		this._updateFilterState(page);
 	};
 
-
 	/**
 	 * An event to fire on load. Will get all items and display them in the
 	 * todo-list
@@ -159,6 +181,7 @@
 			self.view.render('showEntries', data);
 		});
 	};
+
 
 	/**
 	 * Renders all active tasks
@@ -221,22 +244,30 @@
 	/*
 	 * Triggers the item editing mode.
 	 */
+
 	Controller.prototype.editItem = function (id) {
 		var self = this;
 		self.model.read(id, function (data) {
 			self.view.render('editItem', {id: id, title: data[0].title});
 		});
 	};
+	/**
+	 self.view.bind('toggleAll', function (status) {
+		self.toggleAll(status.completed);
+	});
+	 * An event to fire whenever you want to add an item. Simply pass in the event
+	 * object and it'll handle the DOM insertion and saving of the new item.
+	 */
 
 	/*
 	 * Finishes the item editing mode successfully.
 	 */
-	Controller.prototype.editItemSave = function (id, title) {
+	Controller.prototype.editItemSave = function (id, title, modified) {
 		var self = this;
 		title = title.trim();
 
 		if (title.length !== 0) {
-			self.model.update(id, {title: title}, function () {
+			self.model.update(id, {title: title, modified: modified}, function () {
 				self.view.render('editItemDone', {id: id, title: title});
 			});
 		} else {
@@ -269,6 +300,16 @@
 		this._filter();
 
 		this.view.render('setFilter', currentPage);
+	};
+
+	//author xiaomin
+
+	Controller.prototype.setLeftSideBar = function () {
+		var self = this;
+		self.model.getCategoryInfo(function (data) {
+			console.log(data);
+			self.view.render('showLeftSideBar', data);
+		})
 	};
 
 	// Export to window

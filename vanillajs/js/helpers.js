@@ -15,6 +15,15 @@
 		target.addEventListener(type, callback, !!useCapture);
 	};
 
+	window.$on_advance = function (target, type, handler, useCapture) {
+		target.addEventListener(type, dispatchEvent, !!useCapture);
+		function dispatchEvent(event) {
+			var targetElement = event.target;
+			console.log('targetele is:' + targetElement);
+			$parent(targetElement, 'li');
+		}
+	};
+
 	// Attach a handler to event for all elements that match the selector,
 	// now or in the future, based on a root element
 	window.$delegate = function (target, selector, type, handler) {
@@ -22,7 +31,6 @@
 			var targetElement = event.target;
 			var potentialElements = window.qsa(selector, target);
 			var hasMatch = Array.prototype.indexOf.call(potentialElements, targetElement) >= 0;
-
 			if (hasMatch) {
 				handler.call(targetElement, event);
 			}

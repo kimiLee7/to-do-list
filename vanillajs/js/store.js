@@ -10,6 +10,9 @@
 	 * @param {function} callback Our fake DB uses callbacks because in
 	 * real life you probably would be making AJAX calls
 	 */
+	// ========================================关于store 暂时注释掉==================================
+
+	/*
 	function Store(name, callback) {
 		callback = callback || function () {};
 
@@ -25,6 +28,28 @@
 
 		callback.call(this, JSON.parse(localStorage[name]));
 	}
+	*/
+
+	// =======================================重写store==================================
+
+	function Store(name, category_name) {
+//		callback = callback || function () {};
+
+		this._dbName1 = name;
+		this._dbName2 = category_name;
+
+		if (!localStorage[name] || !localStorage[category_name]) {
+			var category_data = {
+				categories: ['Shopping List', 'Travel', 'Trival Matters']
+			};
+			var todo_data = {};
+			localStorage[category_name] = JSON.stringify(category_data);
+			localStorage[name] = JSON.stringify(todo_data);
+		}
+
+//		callback.call(this, JSON.parse(localStorage[name]), JSON.parse(localStorage[category_name]));
+	}
+
 
 	/**
 	 * Finds items based on a query given as a JS object
@@ -95,8 +120,12 @@
 			callback.call(this, JSON.parse(localStorage[this._dbName]).todos);
 		} else {
 			// Generate an ID
-			updateData.id = new Date().getTime();
-
+			var full_time = new Date();
+			updateData.id = full_time.getTime();
+			updateData.created = full_time.getFullYear().toString() + "-"
+			                     + (full_time.getMonth() + 1).toString() + "-"
+				                 + full_time.getDate().toString();
+			updateData.modified = "";
 			todos.push(updateData);
 			localStorage[this._dbName] = JSON.stringify(data);
 			callback.call(this, [updateData]);   //[updateData]是什么意思？？？这个参数存在的意义是？？？？
@@ -123,6 +152,13 @@
 		localStorage[this._dbName] = JSON.stringify(data);
 		callback.call(this, JSON.parse(localStorage[this._dbName]).todos);
 	};
+
+	//xiaomin
+	Store.prototype.readCategoryInfo = function (callback) {
+		callback = callback || function (){};
+		callback.call(this, JSON.parse(localStorage[this._dbName2]).categories);
+	};
+
 
 	// Export to window
 	window.app = window.app || {};

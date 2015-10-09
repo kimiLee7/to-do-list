@@ -12,8 +12,9 @@
 	 *   - render(command, parameterObject)
 	 *     Renders the given command with the options
 	 */
-	function View(template) {
+	function View(template, category_template) {
 		this.template = template;
+		this.category_template = category_template;
 		this.ENTER_KEY = 13;
 		this.ESCAPE_KEY = 27;
 		this.$todoList = qs('.todo-list');
@@ -23,6 +24,7 @@
 		this.$todoItemCounter = qs('.todo-count');
 		this.$footer = qs('.footer');
 		this.$clearCompleted = qs('.clear-completed');
+		this.$left_menu_list = qs('.left_menu_list');
 	}
 
 	View.prototype._removeItem = function (id) {
@@ -82,8 +84,17 @@
 			},
 			setFilter: function () {
 				self._setFilter(parameter);
+			},
+			showTimeInfo: function () {
+				console.log(parameter.modified);
+				self._showTimeInfo(parameter.created, parameter.modified);
+			},
+			hideTimeInfo: function () {
+				qs('.show_time').style.display = 'none';
+			},
+			showLeftSideBar: function () {
+				self.$left_menu_list.innerHTML = self.category_template.returnCategoryTemplate(parameter);
 			}
-
 		};
 
 		viewCommands[viewCmd]();
@@ -118,6 +129,16 @@
 					handler({id: self._itemId(this)});
 			});
 
+		}else if (event == 'getTimeInfo') {
+			$delegate(self.$todoList, '.time_info', 'mouseover', function () {
+					handler({id: self._itemId(this)});
+			});
+
+		}else if (event === 'getTimeInfoDone') {
+			$delegate(self.$todoList, '.time_info', 'mouseout', function () {
+				handler({id: self._itemId(this)});
+			});
+
 		}else if (event === 'itemToggle') {
 			$delegate(self.$todoList, '.toggle', 'click', function () {
 				handler({
@@ -128,7 +149,7 @@
 
 		}else if (event === 'toggleAll') {
 			$on(self.$toggleAll, 'click', function () {
-				handler({completed: this.checked});     //when the event is fired,return this.checked = true;
+				handler({completed: this.checked});     //when the event is fired, return this.checked = true;
 			});
 
 		}else if (event === 'itemEdit') {
@@ -171,9 +192,13 @@
 		var self = this;
 		$delegate(self.$todoList, 'li .edit', 'blur', function () {
 			if (!this.dataset.iscanceled) {
+				var modify_time = new Date();
 				handler({
 					id: self._itemId(this),
-					title: this.value
+					title: this.value,
+					modified: modify_time.getFullYear().toString() + "-"
+						      + (modify_time.getMonth() + 1).toString() + "-"
+					          + modify_time.getDate().toString()
 				});
 			}
 		});
@@ -214,6 +239,12 @@
 		this.$clearCompleted.style.display = visible ? 'block' : 'none';
 	};
 
+	View.prototype._showTimeInfo = function (created, modified) {
+		console.log(created);
+
+		qs('.show_time').innerHTML = this.template.timeFormat(created, modified);
+		qs('.show_time').style.display = 'block';
+	};
 
 	// Export to window
 	window.app = window.app || {};

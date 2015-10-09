@@ -35,8 +35,11 @@
 		+		'<div class="view">'
 		+			'<input class="toggle" type="checkbox" {{checked}}>'
 		+			'<label>{{title}}</label>'
+//		+			'<div class="time_info"></div>
+		+           '<button class="mark"></button>'
 		+			'<button class="destroy"></button>'
 		+		'</div>'
+//		+		'<div class="show_time"></div>'
 		+	'</li>';
 	}
 
@@ -106,6 +109,17 @@
 			return '';
 		}
 	};
+
+	// author: xiaomin
+	Template.prototype.timeFormat = function (created, modified) {
+		if (modified != ''){
+			return '<p>' +  'created:' + created  + '</br>' +  'modified:' + modified + '</p>' ;
+		}else {
+			return  '<p>' +  'created:' + created + '</p>' ;
+		}
+
+	};
+
 
 	// Export to window
 	window.app = window.app || {};
