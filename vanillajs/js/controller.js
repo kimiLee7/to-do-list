@@ -54,7 +54,17 @@
 			self.toggleAll(status.completed);
 		});
 
+		self.view.bind('filterAll', function (category) {
+			self.showAll(category);
+		});
 
+		self.view.bind('filterActive', function (category) {
+			self.showActive(category);
+		});
+
+		self.view.bind('filterCompleted', function (category) {
+			self.showCompleted(category);
+		});
 	}
 
 
@@ -132,9 +142,9 @@
 	 * Updates the pieces of the page which change depending on the remaining
 	 * number of todos.
 	 */
-	Controller.prototype._updateCount = function () {
+	Controller.prototype._updateCount = function (category) {
 		var self = this;
-		self.model.getCount(function (todos) {
+		self.model.getCount(category, function (todos) {
 			self.view.render('updateElementCount', todos.active);
 			self.view.render('clearCompletedButton', {
 				completed: todos.completed,
@@ -150,11 +160,11 @@
 	 * Re-filters the todo items, based on the active route.
 	 * @param {boolean|undefined} force  forces a re-painting of todo items.
 	 */
-	Controller.prototype._filter = function (force) {
+	Controller.prototype._filter = function (force, category) {
 		var activeRoute = this._activeRoute.charAt(0).toUpperCase() + this._activeRoute.substr(1);
 
 		// Update the elements on the page, which change with each completed todo
-		 this._updateCount();
+//		 this._updateCount();
 
 		// If the last active route isn't "All", or we're switching routes, we
 		// re-create the todo item elements, calling:
@@ -163,11 +173,18 @@
 			this['showAll']();
 		}*/
 
-		if (force || this._lastActiveRoute !== 'All' || this._lastActiveRoute !== activeRoute) {
-			this['show' + activeRoute]();
+/*		if (force || this._lastActiveRoute !== 'All' || this._lastActiveRoute !== activeRoute) {
+		 this[('show' + activeRoute)](category);
+		 }*/
+		if (activeRoute == 'All') {
+			this.showAll(category);
+		}else if (activeRoute == 'Active') {
+			this.showActive(category);
+		}else {
+			this.showCompleted(category);
 		}
 
-		this._lastActiveRoute = activeRoute;
+//		this._lastActiveRoute = activeRoute;
 	};
 
 	/**
@@ -189,32 +206,35 @@
 	 * An event to fire on load. Will get all items and display them in the
 	 * todo-list
 	 */
-	Controller.prototype.showAll = function () {
+	Controller.prototype.showAll = function (category) {
 		var self = this;
-		self.model.read(function (data) {
+		self.model.read(category, function (data) {
 			self.view.render('showEntries', data);
 		});
+		self.view.render('setFilter', 'filter_state_all');
 	};
 
 
 	/**
 	 * Renders all active tasks
 	 */
-	Controller.prototype.showActive = function () {
+	Controller.prototype.showActive = function (category) {
 		var self = this;
-		self.model.read({ completed: false }, function (data) {
+		self.model.read(category, { completed: false }, function (data) {
 			self.view.render('showEntries', data);
 		});
+		self.view.render('setFilter', 'filter_state_active');
 	};
 
 	/**
 	 * Renders all completed tasks
 	 */
-	Controller.prototype.showCompleted = function () {
+	Controller.prototype.showCompleted = function (category) {
 		var self = this;
-		self.model.read({ completed: true }, function (data) {
+		self.model.read(category, { completed: true }, function (data) {
 			self.view.render('showEntries', data);
 		});
+		self.view.render('setFilter', 'filter_state_active');
 	};
 
 	/**
@@ -311,16 +331,16 @@
 	/**
 	 * Simply updates the filter nav's selected states
 	 */
-	Controller.prototype._updateFilterState = function (currentPage) {
+	Controller.prototype._updateFilterState = function (category, currentPage) {
 		// Store a reference to the active route, allowing us to re-filter todo
 		// items as they are marked complete or incomplete.
 		this._activeRoute = currentPage;
 
 		if (currentPage === '') {
-			this._activeRoute = 'All';
+			this._activeRoute = 'all';
 		}
 
-		this._filter();
+		this._filter(category);
 
 		this.view.render('setFilter', currentPage);
 	};
@@ -357,8 +377,10 @@
 		self.model.read(page, function(data) {
 			self.view.render('showEntries', data);
 		});
+		self._updateCount(page);
 	};
 
+	// show current category on the left of top menu bar
 	Controller.prototype.showCurrentCategory = function (category) {
 		var self = this;
 		if (category == '') {

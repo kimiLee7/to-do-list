@@ -26,8 +26,10 @@
 		this.$clearCompleted = qs('.clear-completed');
 		this.$left_menu_list = qs('.left_menu_list');
 		this.$current_category = qs('#show_current_category');
+		this.$filter_all = qs('#filter_state_all');
+		this.$filter_active = qs('#filter_state_active');
+		this.$filter_completed = qs('#filter_state_completed');
 	}
-
 	View.prototype._removeItem = function (id) {
 		var elem = qs('[data-id="' + id + '"]');
 
@@ -172,6 +174,22 @@
 				handler();
 			});
 
+		}else if (event === 'filterAll') {
+			$on(self.$filter_all, 'click', function () {
+				var category = document.location.hash.split('/')[2];
+				handler(category);
+		});
+
+		}else if (event === 'filterActive') {
+			$on(self.$filter_active, 'click', function () {
+				var category = document.location.hash.split('/')[2];
+				handler(category);
+			});
+		}else if (event === 'filterCompleted') {
+			$on(self.$filter_completed, 'click', function () {
+				var category = document.location.hash.split('/')[2];
+				handler(category);
+			});
 		}
 	};
 
@@ -233,9 +251,9 @@
 		});
 	};
 
-	View.prototype._setFilter = function (currentPage) {
+	View.prototype._setFilter = function (idOfa) {
 		qs('.filters .selected').className = '';
-		qs('.filters [href="#/' + currentPage + '"]').className = 'selected';
+     	qs('.filters #' + idOfa).className = 'selected';
 	};
 
 	View.prototype._clearCompletedButton = function (completedCount, visible) {
