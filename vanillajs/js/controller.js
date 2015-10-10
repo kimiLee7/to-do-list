@@ -20,6 +20,7 @@
 		self.view.bind('itemRemove', function (item) {
 			self.removeItem(item.id);
 		});
+/*
 
 		self.view.bind("getTimeInfo", function(item) {
 			console.log(item.id);
@@ -29,7 +30,7 @@
 		self.view.bind("getTimeInfoDone", function (item) {
 			self.hideTimeInfo(item.id);
 		});
-
+*/
 		self.view.bind('itemToggle', function (item) {
 			self.toggleComplete(item.id, item.completed);
 		});
@@ -82,11 +83,14 @@
 	 */
 	Controller.prototype.removeItem = function (id) {
 		var self = this;
-		self.model.remove(id, function () {
+		var locationHash = document.location.hash;
+		var category = locationHash.split('/')[2];
+		self.model.remove(category, id, function () {
 			self.view.render('removeItem', id);
 		});
 
-		self._filter();
+//	   self._filter();
+		self.updateTodoContent(category);
 	};
 
 	Controller.prototype.showTimeInfo = function(id) {
@@ -113,13 +117,15 @@
 	 */
 	Controller.prototype.removeCompletedItems = function () {
 		var self = this;
-		self.model.read({ completed: true }, function (data) {
+		var locationHash = document.location.hash;
+		var category = locationHash.split('/')[2];
+		self.model.read(category, { completed: true }, function (data) {
 			data.forEach(function (item) {
 				self.removeItem(item.id);
 			});
 		});
 
-		self._filter();
+		self.updateTodoContent(category);
 	};
 
 	/**
@@ -222,7 +228,9 @@
 	 */
 	Controller.prototype.toggleComplete = function (id, completed, silent) {
 		var self = this;
-		self.model.update(id, { completed: completed }, function () {
+		var locationHash = document.location.hash;
+		var category = locationHash.split('/')[2];
+		self.model.update(category, id, { completed: completed }, function () {
 			self.view.render('elementComplete', {
 				id: id,
 				completed: completed
@@ -230,7 +238,7 @@
 		});
 
 		if (!silent) {
-			self._filter();
+			self.updateTodoContent(category);
 		}
 	};
 
@@ -240,13 +248,15 @@
 	 */
 	Controller.prototype.toggleAll = function (completed) {
 		var self = this;
-		self.model.read({ completed: !completed }, function (data) {
+		var locationHash = document.location.hash;
+		var category = locationHash.split('/')[2];
+		self.model.read(category, { completed: !completed }, function (data) {
 			data.forEach(function (item) {
 				self.toggleComplete(item.id, completed, true);
 			});
 		});
 
-		self._filter();
+		self.updateTodoContent(category);
 	};
 
 	/*
@@ -255,7 +265,9 @@
 
 	Controller.prototype.editItem = function (id) {
 		var self = this;
-		self.model.read(id, function (data) {
+		var locationHash = document.location.hash;
+		var category = locationHash.split('/')[2];
+		self.model.read(category, id, function (data) {
 			self.view.render('editItem', {id: id, title: data[0].title});
 		});
 	};
@@ -273,9 +285,10 @@
 	Controller.prototype.editItemSave = function (id, title, modified) {
 		var self = this;
 		title = title.trim();
-
+		var locationHash = document.location.hash;
+		var category = locationHash.split('/')[2];
 		if (title.length !== 0) {
-			self.model.update(id, {title: title, modified: modified}, function () {
+			self.model.update(category, id, {title: title, modified: modified}, function () {
 				self.view.render('editItemDone', {id: id, title: title});
 			});
 		} else {
@@ -288,7 +301,9 @@
 	 */
 	Controller.prototype.editItemCancel = function (id) {
 		var self = this;
-		self.model.read(id, function (data) {
+		var locationHash = document.location.hash;
+		var category = locationHash.split('/')[2];
+		self.model.read(category, id, function (data) {
 			self.view.render('editItemDone', {id: id, title: data[0].title});
 		});
 	};

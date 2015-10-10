@@ -64,12 +64,12 @@
 	 *	 // hello: world in their properties
 	 * });
 	 */
-	Store.prototype.find = function (query, callback) {
+	Store.prototype.find = function (category, query, callback) {
 		if (!callback) {
 			return;
 		}
 
-		var todos = JSON.parse(localStorage[this._dbName1]).todos;
+		var todos = JSON.parse(localStorage[this._dbName1])[category];
 
 		callback.call(this, todos.filter(function (todo) {
 			for (var q in query) {
@@ -119,17 +119,17 @@
 
 		// If an ID was actually given, find the item and update each property
 		if (id) {
-			for (var i = 0; i < todos.length; i++) {
-				if (todos[i].id === id) {
+			for (var i = 0; i < data[category].length; i++) {
+				if (data[category][i].id === id) {
 					for (var key in updateData) {
-						todos[i][key] = updateData[key];
+						data[category][i][key] = updateData[key];
 					}
 					break;
 				}
 			}
 
 			localStorage[this._dbName1] = JSON.stringify(data);
-			callback.call(this, JSON.parse(localStorage[this._dbName1]).todos);
+			callback.call(this, JSON.parse(localStorage[this._dbName1])[category]);
 		} else {
 			// Generate an ID
 			var full_time = new Date();
@@ -151,9 +151,9 @@
 	 * @param {number} id The ID of the item you want to remove
 	 * @param {function} callback The callback to fire after saving
 	 */
-	Store.prototype.remove = function (id, callback) {
+	Store.prototype.remove = function (category, id, callback) {
 		var data = JSON.parse(localStorage[this._dbName1]);
-		var todos = data.todos;
+		var todos = data[category];
 
 		for (var i = 0; i < todos.length; i++) {
 			if (todos[i].id == id) {
@@ -163,7 +163,7 @@
 		}
 
 		localStorage[this._dbName1] = JSON.stringify(data);
-		callback.call(this, JSON.parse(localStorage[this._dbName1]).todos);
+		callback.call(this, JSON.parse(localStorage[this._dbName1])[category]);
 	};
 
 	//xiaomin

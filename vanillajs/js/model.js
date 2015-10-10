@@ -54,9 +54,9 @@
 			return this.storage.findAll(category, callback);
 		} else if (queryType === 'string' || queryType === 'number') {
 			query = parseInt(query, 10);
-			this.storage.find({ id: query }, callback);
+			this.storage.find(category, { id: query }, callback);
 		} else {
-			this.storage.find(query, callback);
+			this.storage.find(category, query, callback);
 		}
 	};
 
@@ -68,8 +68,8 @@
 	 * @param {object} data The properties to update and their new value
 	 * @param {function} callback The callback to fire when the update is complete.
 	 */
-	Model.prototype.update = function (id, data, callback) {
-		this.storage.save(data, callback, id);
+	Model.prototype.update = function (category, id, data, callback) {
+		this.storage.save(category, data, callback, id);
 	};
 
 
@@ -79,8 +79,8 @@
 	 * @param {number} id The ID of the model to remove
 	 * @param {function} callback The callback to fire when the removal is complete.
 	 */
-	Model.prototype.remove = function (id, callback) {
-		this.storage.remove(id, callback);
+	Model.prototype.remove = function (category, id, callback) {
+		this.storage.remove(category, id, callback);
 	};
 
 	/**
