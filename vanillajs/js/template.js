@@ -36,11 +36,26 @@
 		+			'<input class="toggle" type="checkbox" {{checked}}>'
 		+			'<label>{{title}}</label>'
 //		+			'<div class="time_info"></div>
-		+           '<button class="mark"></button>'
+		+           '<button class="mark" value = "{{value}}"></button>'
 		+			'<button class="destroy"></button>'
 		+		'</div>'
 //		+		'<div class="show_time"></div>'
 		+	'</li>';
+
+		this.searchCategoryTemplate
+		=	'<li class="show_category">'
+		+   	'<a href="{{path}}">{{category}}</a>'
+		+   '</li>';
+
+/*		+	'<li data-id="{{id}}" class="{{completed}}">'
+		+		'<div class="view">'
+		+			'<input class="toggle" type="checkbox" {{checked}}>'
+		+			'<label>{{title}}</label>'
+		+			'<button class="mark"></button>'
+		+			'<button class="destroy"></button>'
+		+		'</div>'
+		+  '</li>';*/
+
 	}
 
 	/**
@@ -68,19 +83,25 @@
 			var template = this.defaultTemplate;
 			var completed = '';
 			var checked = '';
-
+			var marked = 'mark';
+			var value = '0';
 			if (data[i].completed) {
 				completed = 'completed';
 				checked = 'checked';
+			}
+			if (data[i].marked) {
+				marked = 'marked';
+				value = '1';
 			}
 
 			template = template.replace('{{id}}', data[i].id);
 			template = template.replace('{{title}}', escape(data[i].title));
 			template = template.replace('{{completed}}', completed);
 			template = template.replace('{{checked}}', checked);
+			template = template.replace('mark', marked);
+			template = template.replace('{{value}}', value);
 			view = view + template;
 		}
-
 		return view;
 	};
 
@@ -118,6 +139,44 @@
 			return  '<p>' +  'created:' + created + '</p>' ;
 		}
 
+	};
+
+	Template.prototype.showSearchResults = function (categories, todos) {
+		var view = '';
+
+		for (var i = 0; i < categories.length; i++) {
+			var search_category_view = '';
+			var category_template = this.searchCategoryTemplate;
+			category_template = category_template.replace('{{path}}', '#/category/'+ categories[i]);
+			category_template = category_template.replace('{{category}}', categories[i]);
+			search_category_view = search_category_view + category_template;
+			var search_todos_list_view = '';
+			for (var j = 0; j < todos[categories[i]].length; j++) {
+				var search_todos_template = this.defaultTemplate;
+				var completed = '';
+				var checked = '';
+
+				var marked = 'mark';
+				var value = '0';
+				if (todos[categories[i]][j].completed) {
+					completed = 'completed';
+					checked = 'checked';
+				}
+				if (todos[categories[i]][j].marked) {
+					marked = 'marked';
+					value = '1';
+				}
+				search_todos_template = search_todos_template.replace('{{id}}', todos[categories[i]][j].id);
+				search_todos_template = search_todos_template.replace('{{title}}', escape(todos[categories[i]][j].title));
+				search_todos_template = search_todos_template.replace('{{completed}}', completed);
+				search_todos_template = search_todos_template.replace('{{checked}}', checked);
+				search_todos_template = search_todos_template.replace('mark', marked);
+				search_todos_template = search_todos_template.replace('{{value}}', value);
+				search_todos_list_view = search_todos_list_view + search_todos_template;
+			}
+			view = view + search_category_view + search_todos_list_view;
+		}
+		return view;
 	};
 
 

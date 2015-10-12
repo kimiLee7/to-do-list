@@ -9,8 +9,10 @@
 <body>
     <div id="left_side_bar">
         <div id="search_bar">
-            <input type="text">
-            <img src="images/search.png" width="25px" height="25px"/>
+            <input type="text" placeholder="please enter title   ">
+            <a class="search_icon" href="#/search">
+                <img src="images/search.png" width="25px" height="25px"/>
+            </a>
         </div>
         <div id="profile">
             <div class="profile_icon"></div>
@@ -48,7 +50,7 @@
     <div id="top_menu_bar">
         <span id="show_current_category"></span>
         <ul class="top_menu_list">
-            <li>
+            <li class="sort">
                 <img src="images/sort.png" alt="sort icon" width="30px" height="30px"/>
                 <span>Sort</span>
             </li>
@@ -86,7 +88,11 @@
                 <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
             </footer>
             -->
+
         </footer>
+    </section>
+    <section class="search_results">
+        <ul class="search_tasks_list"></ul>
     </section>
     <script src="js/helpers.js"></script>
     <script src="js/store.js"></script>

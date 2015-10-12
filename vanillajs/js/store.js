@@ -167,6 +167,7 @@
 	};
 
 	//xiaomin
+
 	Store.prototype.readCategoryInfo = function (callback) {
 		callback = callback || function (){};
 		callback.call(this, JSON.parse(localStorage[this._dbName2]).categories);
@@ -175,6 +176,110 @@
 	Store.prototype.readFirstCategory = function (callback) {
 		callback = callback || function () {};
 		callback.call(this, JSON.parse(localStorage[this._dbName2]).categories[0] );
+	};
+
+	/**
+	 * query match todos by title, support fuzzy query
+	 * 返回的数据格式如：{categories: ['shopping list', 'trival matters', ...], todos: {[{}, {}, ....],....}}
+	 * @param callback
+	 */
+
+	Store.prototype.findMatch = function (keyword, callback) {
+		callback = callback || function () {};
+		var categories = JSON.parse(localStorage[this._dbName2]).categories;
+		var allTodos = JSON.parse(localStorage[this._dbName1]);
+		var matchCategories = [];
+		var matchTodos = {};
+		for (var i = 0; i < categories.length; i++) {
+			var eachCategoryTodos = allTodos[categories[i]];
+			matchTodos[categories[i]] = [];
+			for (var j = 0; j < eachCategoryTodos.length; j++) {
+				if (eachCategoryTodos[j].title.indexOf(keyword) !== -1) {
+					matchCategories.push(categories[i]);
+					matchTodos[categories[i]].push(eachCategoryTodos[j]);
+				}
+			}
+		}
+		// 给数组 matchCategories 去重
+		var sorted = matchCategories.sort();
+		var result = [];
+		result.push(sorted[0]);
+		for (var k = 1; k < matchCategories.length; k++) {
+			if (sorted[k] !== result[result.length -1]) {
+				result.push(sorted[k]);
+			}
+		}
+
+		callback.call(this, {categories: result, todos: matchTodos});
+	};
+
+	Store.prototype.sort = function (category, callback) {
+		var data = JSON.parse(localStorage[this._dbName1]);
+		var todos = data[category];
+		var sortedTodos = [];
+		var titleArray = [];
+		for (var i = 0; i < todos.length; i++) {
+			titleArray.push(todos[i].title);
+		}
+		var sortedTitle = titleArray.sort();
+		for (var j = 0; j < sortedTitle.length; j++) {
+			for (var k = 0; k < todos.length; k++) {
+				if (todos[k].title == sortedTitle[j]) {
+					sortedTodos.push(todos[k]);
+				}
+			}
+		}
+		callback.call(this, sortedTodos);
+	};
+
+	Store.prototype.removeAItemInAllCategories = function (query, callback) {
+		callback = callback || function () {};
+		var categories = JSON.parse(localStorage[this._dbName2]).categories;
+		var data = JSON.parse(localStorage[this._dbName1]);
+		for (var i = 0; i < categories.length; i++) {
+			for (var j = 0; j < data[categories[i]].length; j++) {
+					if (data[categories[i]][j].id == query.id) {
+					data[categories[i]].splice(j, 1);
+					break;
+				}
+			}
+		}
+		localStorage[this._dbName1] = JSON.stringify(data);
+		callback.call(this, JSON.parse(localStorage[this._dbName1]));
+	};
+
+	Store.prototype.updateInSearchResults = function (updateData, id, callback) {
+		callback = callback || function () {};
+		var categories = JSON.parse(localStorage[this._dbName2]).categories;
+		var data = JSON.parse(localStorage[this._dbName1]);
+		for (var i = 0; i < categories.length; i++) {
+			for (var j = 0; j < data[categories[i]].length; j++) {
+				if (data[categories[i]][j].id == id) {
+					for (var key in updateData) {
+						data[categories[i]][j][key] = updateData[key];
+					}
+					break;
+				}
+			}
+		}
+		localStorage[this._dbName1] = JSON.stringify(data);
+		callback.call(this, JSON.parse(localStorage[this._dbName1]));
+	};
+
+	Store.prototype.findAnItemInAllCategories = function (id, callback) {
+		var todo = [];
+		callback = callback || function () {};
+		var categories = JSON.parse(localStorage[this._dbName2]).categories;
+		var data = JSON.parse(localStorage[this._dbName1]);
+		for (var i = 0; i < categories.length; i++) {
+			for (var j = 0; j < data[categories[i]].length; j++) {
+				if (data[categories[i]][j].id == id) {
+					todo.push(data[categories[i]][j]);
+					break;
+				}
+			}
+		}
+		callback.call(this, todo[0]);
 	};
 
 

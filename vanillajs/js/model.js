@@ -24,7 +24,8 @@
 
 		var newItem = {
 			title: title.trim(),
-			completed: false
+			completed: false,
+			marked: false
 		};
 
 		this.storage.save(category, newItem, callback);
@@ -114,6 +115,26 @@
 
 	Model.prototype.getFirstCategory = function (callback) {
 		this.storage.readFirstCategory(callback);
+	};
+
+	Model.prototype.readMatch = function (keyword, callback) {
+		this.storage.findMatch(keyword, callback);
+	};
+
+	Model.prototype.readSorted = function (category, callback) {
+		this.storage.sort(category, callback);
+	};
+
+	Model.prototype.removeAItemInAllCategories = function (query, callback) {
+		this.storage.removeAItemInAllCategories(query, callback);
+	};
+
+	Model.prototype.updateInSearchResults = function (updateData, id, callback) {
+		this.storage.updateInSearchResults(updateData, id, callback);
+	};
+
+	Model.prototype.findAnItemInAllCategories = function (id, callback) {
+		this.storage.findAnItemInAllCategories(id, callback);
 	};
 
 	// Export to window

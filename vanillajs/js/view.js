@@ -29,6 +29,12 @@
 		this.$filter_all = qs('#filter_state_all');
 		this.$filter_active = qs('#filter_state_active');
 		this.$filter_completed = qs('#filter_state_completed');
+		this.$todoapp = qs('.todoapp');
+		this.$search = qs('.search_icon');
+		this.$search_input = qs('#search_bar input[type="text"]');
+		this.$search_section = qs('.search_results');
+		this.$search_list = qs('.search_tasks_list');
+		this.$sort = qs('.sort');
 	}
 	View.prototype._removeItem = function (id) {
 		var elem = qs('[data-id="' + id + '"]');
@@ -100,6 +106,35 @@
 			},
 			showCurrentCategory: function () {
 				self.$current_category.innerHTML = parameter;
+			},
+			showSearchResults: function () {
+				self.$todoapp.style.display = 'none';
+				self.$search_section.style.display = 'block';
+				self.$search_list.innerHTML = self.template.showSearchResults(parameter.categories, parameter.todos);
+			},
+			sortAZ: function () {
+				self.$todoList.innerHTML = self.template.show(parameter);
+			},
+			removeInSearchList: function () {
+				self._removeItemInSearchResults(parameter.id);
+			},
+			toggleCompleteInSearchList: function () {
+				self._elementCompleteInSearchList(parameter.id, parameter.completed);
+			},
+			editItemInSearchList: function () {
+				self._editItemInSearchList(parameter.id, parameter.title);
+			},
+			editItemDoneInSearchList: function () {
+				self._editItemDoneInSearchList(parameter.id, parameter.title);
+			},
+			editItemCancelInSearchList: function () {
+				self._editItemCancelInSearchList(parameter.id);
+			},
+			elementMarked: function () {
+				self._markItem(parameter.id, parameter.marked);
+			},
+			elementMarkedInSearchList: function () {
+				self._markItemInSearchList(parameter.id, parameter.marked);
 			}
 		};
 
@@ -173,7 +208,7 @@
 			$on(self.$clearCompleted, 'click', function () {
 				handler();
 			});
-
+//  author xiaomin
 		}else if (event === 'filterAll') {
 			$on(self.$filter_all, 'click', function () {
 				var category = document.location.hash.split('/')[2];
@@ -190,7 +225,45 @@
 				var category = document.location.hash.split('/')[2];
 				handler(category);
 			});
+		}else if (event === 'search') {
+			$on(self.$search, 'click', function () {
+				var keyword = self.$search_input.value;
+				handler(keyword);
+			});
+		}else if (event === 'sortAz') {
+			$on(self.$sort, 'click', function () {
+				var category = document.location.hash.split('/')[2];
+				handler(category);
+			});
+		}else if (event === 'removeItemInSearchResult') {
+			$delegate(self.$search_list, '.destroy', 'click', function () {
+				handler({id: self._itemId(this)});
+			});
+		}else if (event === 'toggleItemInSearchResult') {
+			$delegate(self.$search_list, '.toggle', 'click', function () {
+				handler({id: self._itemId(this), completed: this.checked});
+			});
+		}else if (event === 'editItemInSearchResult') {
+			$delegate(self.$search_list, 'li label' , 'dblclick', function () {
+				handler({id: self._itemId(this)});
+			});
+		}else if (event === 'itemEditDoneInSearchResult') {
+			self._bindItemEditDoneInSearchList(handler);
+		}else if (event === 'itemEditCancelInSearchResult') {
+			self._bindItemEditCancelInSearchList(handler);
+		}else if (event === 'markItem') {
+			// 此处selector = 'button', 不能为'.mark', 因为状态为marked时，className 为 '.marked', 如果使用'.mark', 会导致无法获得发生点击事件的元素
+			$delegate(self.$todoList, 'button', 'click', function () {
+				var marked = self._ifMarked(this);
+				handler({id: self._itemId(this), marked: marked});
+			});
+		}else if (event === 'markItemInSearchResult') {
+			$delegate(self.$search_list, 'button', 'click', function () {
+				var marked = self._ifMarked(this);
+				handler({id: self._itemId(this), marked: marked});
+			})
 		}
+
 	};
 
 	View.prototype._editItem = function (id, title) {
@@ -247,7 +320,7 @@
 		listItem.className = listItem.className.replace('editing', '');
 
 		qsa('label', listItem).forEach(function (label) {
-			label.textContent = title;
+			label.textContent = title;                       //设置label标签的内容？？？ textContent???
 		});
 	};
 
@@ -262,13 +335,133 @@
 	};
 
 	View.prototype._showTimeInfo = function (created, modified) {
-		console.log(created);
-
 		qs('.show_time').innerHTML = this.template.timeFormat(created, modified);
 		qs('.show_time').style.display = 'block';
 	};
 
+	View.prototype._removeItemInSearchResults = function (id) {
+		var elem = qs('[data-id="' + id + '"]');
+		if (elem) {
+			this.$search_list.removeChild(elem);
+		}
+	};
 
+	View.prototype._elementCompleteInSearchList = function (id, completed) {
+		var listItem  = qs('[data-id="' + id + '"]', this.$search_list);
+		if (!listItem) {
+			return;
+		}
+		listItem.className = completed ? 'completed' : '';
+		// In case it was toggled from an event and not by clicking the checkbox
+		qs('input', listItem).checked = completed;
+
+	};
+
+	View.prototype._editItemInSearchList = function (id, title) {
+		var listItem = qs('[data-id = "' + id + '"]', this.$search_list);
+		if (!listItem) {
+			return;
+		}
+		listItem.className = listItem.className + ' editing';
+
+		var input = document.createElement('input');
+		input.className = 'edit';
+
+		listItem.appendChild(input);
+		input.focus();
+		input.value = title;
+	};
+
+	View.prototype._bindItemEditDoneInSearchList = function (handler) {
+		var self = this;
+		$delegate(self.$search_list, 'li .edit', 'blur', function () {
+			if (!this.dataset.iscanceled) {
+				var modify_time = new Date();
+				handler({
+					id: self._itemId(this),
+					title: this.value,
+					modified: modify_time.getFullYear().toString() + "-"
+					+ (modify_time.getMonth() + 1).toString() + "-"
+					+ modify_time.getDate().toString()
+				});
+			}
+		});
+
+		$delegate(self.$search_list, 'li .edit', 'keypress', function (event) {
+			if (event.keyCode === self.ENTER_KEY) {
+				// Remove the cursor from the input when you hit enter just like if it
+				// were a real form
+				this.blur();
+			}
+		});
+	};
+
+	View.prototype._editItemDoneInSearchList = function (id, title) {
+		var listItem = qs('[data-id = "' + id + '"]', this.$search_list);
+		if (!listItem) {
+			return;
+		}
+
+		var input = qs('input.edit', listItem);
+		listItem.removeChild(input);
+
+		listItem.className = listItem.className.replace('editing', '');
+
+		qsa('label', listItem).forEach(function (label) {
+			label.textContent = title;
+		});
+	};
+
+	View.prototype._bindItemEditCancelInSearchList = function (handler) {
+		var self = this;
+		$delegate(self.$search_list, 'li .edit', 'keyup', function (event) {
+			if (event.keyCode === self.ESCAPE_KEY) {
+				this.dataset.iscanceled = true;
+				this.blur();
+				handler({id: self._itemId(this)});
+			}
+		});
+	};
+
+	View.prototype._editItemCancelInSearchList = function (id) {
+		var listItem = qs('[data-id = "' + id + '"]', this.$search_list);
+		if (!listItem) {
+			return;
+		}
+
+		var input = qs('input.edit', listItem);
+		listItem.removeChild(input);
+		listItem.className = listItem.className.replace('editing', '');
+	};
+
+	View.prototype._markItem = function (id, marked) {
+		var listItem = qs('[data-id = "' + id + '"]', this.$todoList);
+		if (!listItem) {
+			return;
+		}
+
+		var button = qs('button', listItem);
+		button.className = marked? 'marked': 'mark';
+	};
+
+	//判断element是否marked, 通过给button元素增加一个value属性来判断， value ==0, not marked; value ==1, marked
+	View.prototype._ifMarked = function (ele) {
+		var li = $parent(ele, 'li');
+		if(qs('button', li).value === '0') {
+			return true;
+		}else {
+			return false;
+		}
+	};
+
+	View.prototype._markItemInSearchList = function (id, marked) {
+		var listItem = qs('[data-id = "' + id + '"]', this.$search_list);
+		if (!listItem) {
+			return;
+		}
+		var button = qs('button', listItem);
+		button.className = marked? 'marked': 'mark';
+	};
 
 	// Export to window
 	window.app = window.app || {};

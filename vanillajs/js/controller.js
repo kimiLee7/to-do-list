@@ -32,6 +32,7 @@
 		});
 */
 		self.view.bind('itemToggle', function (item) {
+			console.log(item.completed);
 			self.toggleComplete(item.id, item.completed);
 		});
 
@@ -54,6 +55,7 @@
 			self.toggleAll(status.completed);
 		});
 
+		// author xiaomin
 		self.view.bind('filterAll', function (category) {
 			self.showAll(category);
 		});
@@ -65,6 +67,42 @@
 		self.view.bind('filterCompleted', function (category) {
 			self.showCompleted(category);
 		});
+
+		self.view.bind('search', function (keyword) {
+			self.search(keyword);
+		});
+
+		self.view.bind('sortAz', function (category) {
+			self.sort(category);
+		});
+
+		self.view.bind('removeItemInSearchResult', function (item) {
+			self.removeItemInSearchResults(item);
+		});
+
+		self.view.bind('toggleItemInSearchResult', function (item) {
+			self.toggleCompleteInSearchResults(item.id, item.completed);
+		});
+
+		self.view.bind('editItemInSearchResult', function (item) {
+			self.editItemInSearchResult(item.id);
+		});
+
+		self.view.bind('itemEditDoneInSearchResult', function (item) {
+			self.itemEditSaveInSearchResult(item.id, item.title, item.modified);
+		});
+
+		self.view.bind('itemEditCancelInSearchResult', function (item) {
+			self.itemEditCancelInSearchResult(item.id);
+		});
+
+		self.view.bind('markItem', function (item) {
+			self.markItem(item.id, item.marked, false);
+		});
+
+		self.view.bind('markItemInSearchResult', function (item) {
+			self.markItemInSearchList(item.id, item.marked);
+		})
 	}
 
 
@@ -80,7 +118,6 @@
 
 		self.model.create(category, title, function () {
 			self.view.render('clearNewTodo');
-//			self._filter(true);
 			self.updateTodoContent(category);
 		});
 	};
@@ -234,7 +271,7 @@
 		self.model.read(category, { completed: true }, function (data) {
 			self.view.render('showEntries', data);
 		});
-		self.view.render('setFilter', 'filter_state_active');
+		self.view.render('setFilter', 'filter_state_completed');
 	};
 
 	/**
@@ -369,7 +406,9 @@
 		if (route1 == 'category') {
 			this.showCurrentCategory(page);
 			this.updateTodoContent(page);
-		}
+		}/*else if (route1 == 'search') {
+			this.search(this.view.getKeyword());
+		}*/
 	};
 
 	Controller.prototype.updateTodoContent = function (page) {
@@ -392,6 +431,84 @@
 		}
 	};
 
+	//search by keyword
+	Controller.prototype.search = function (keyword) {
+		var self = this;
+		self.model.readMatch(keyword, function (data) {
+			self.view.render('showSearchResults',data);
+		});
+	};
+
+	//sort by title a-z
+	Controller.prototype.sort = function (category) {
+		var self = this;
+		self.model.readSorted(category, function (data) {
+			self.view.render('sortAZ', data);
+		});
+	};
+
+	Controller.prototype.removeItemInSearchResults = function (query) {
+		var self = this;
+		self.model.removeAItemInAllCategories(query, function () {
+			self.view.render('removeInSearchList', query);
+		});
+	};
+
+	Controller.prototype.toggleCompleteInSearchResults = function (id, completed) {
+		var self = this;
+		self.model.updateInSearchResults({completed: completed}, id, function () {
+			self.view.render('toggleCompleteInSearchList', {id: id, completed: completed});
+		});
+	};
+
+	Controller.prototype.editItemInSearchResult = function (id) {
+		var self = this;
+		self.model.findAnItemInAllCategories(id, function (item) {
+			self.view.render('editItemInSearchList', {id: item.id, title: item.title});
+		});
+	};
+
+	Controller.prototype.itemEditSaveInSearchResult = function (id, title, modified) {
+		var self = this;
+		title = title.trim();
+		if (title.length != 0){
+			self.model.updateInSearchResults({title: title, modified: modified}, id, function () {
+				self.view.render('editItemDoneInSearchList', {title: title, id: id });
+			});
+		}else{
+			self.removeItemInSearchResults({id: id});
+		}
+	};
+
+	Controller.prototype.itemEditCancelInSearchResult = function (id) {
+		this.view.render('editItemCancelInSearchList', {id: id});
+	};
+
+	Controller.prototype.markItem = function (id, marked, silent) {
+		var self = this;
+		var locationHash = document.location.hash;
+		var category = locationHash.split('/')[2];
+		self.model.update(category, id, { marked: marked }, function () {
+			self.view.render('elementMarked', {
+				id: id,
+				marked: marked
+			});
+		});
+
+		if (!silent) {
+			self.updateTodoContent(category);
+		}
+	};
+
+	Controller.prototype.markItemInSearchList = function (id, marked) {
+		var self = this;
+		self.model.updateInSearchResults({marked: marked}, id, function () {
+			self.view.render('elementMarkedInSearchList', {
+				id: id,
+				marked: marked
+			});
+		})
+	};
 
 	// Export to window
 	window.app = window.app || {};

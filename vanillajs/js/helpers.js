@@ -19,7 +19,6 @@
 		target.addEventListener(type, dispatchEvent, !!useCapture);
 		function dispatchEvent(event) {
 			var targetElement = event.target;
-			console.log('targetele is:' + targetElement);
 			$parent(targetElement, 'li');
 		}
 	};
