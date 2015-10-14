@@ -35,6 +35,9 @@
 		this.$search_section = qs('.search_results');
 		this.$search_list = qs('.search_tasks_list');
 		this.$sort = qs('.sort');
+		this.$marked_section = qs('.marked_list_section');
+		this.$marked_list = qs('.marked_list');
+		this.$marked_menu = qs('.left_menu_marked li');
 	}
 	View.prototype._removeItem = function (id) {
 		var elem = qs('[data-id="' + id + '"]');
@@ -62,6 +65,9 @@
 		var self = this;
 		var viewCommands = {
 			showEntries: function () {
+				self.$search_section.style.display = 'none';
+				self.$marked_section.style.display = 'none';
+				self.$todoapp.style.display = 'block';
 				self.$todoList.innerHTML = self.template.show(parameter);
 			},
 			clearNewTodo: function () {
@@ -95,46 +101,65 @@
 				self._setFilter(parameter);
 			},
 			showTimeInfo: function () {
-				console.log(parameter.modified);
 				self._showTimeInfo(parameter.created, parameter.modified);
 			},
 			hideTimeInfo: function () {
 				qs('.show_time').style.display = 'none';
 			},
 			showLeftSideBar: function () {
-				self.$left_menu_list.innerHTML = self.category_template.show(parameter);
+				self.$left_menu_list.innerHTML = self.category_template.show(parameter.category, parameter.data);
 			},
 			showCurrentCategory: function () {
 				self.$current_category.innerHTML = parameter;
 			},
 			showSearchResults: function () {
 				self.$todoapp.style.display = 'none';
+				self.$marked_section.style.display = 'none';
 				self.$search_section.style.display = 'block';
+				self.$current_category.innerHTML = 'Search Results';
 				self.$search_list.innerHTML = self.template.showSearchResults(parameter.categories, parameter.todos);
 			},
 			sortAZ: function () {
 				self.$todoList.innerHTML = self.template.show(parameter);
 			},
 			removeInSearchList: function () {
-				self._removeItemInSearchResults(parameter.id);
+				self._removeItemInSearchResults(parameter.id, parameter.where);
 			},
 			toggleCompleteInSearchList: function () {
-				self._elementCompleteInSearchList(parameter.id, parameter.completed);
+				self._elementCompleteInSearchList(parameter.id, parameter.completed, parameter.where);
 			},
 			editItemInSearchList: function () {
-				self._editItemInSearchList(parameter.id, parameter.title);
+				self._editItemInSearchList(parameter.id, parameter.title, parameter.where);
 			},
 			editItemDoneInSearchList: function () {
-				self._editItemDoneInSearchList(parameter.id, parameter.title);
+				self._editItemDoneInSearchList(parameter.id, parameter.title, parameter.where);
 			},
 			editItemCancelInSearchList: function () {
-				self._editItemCancelInSearchList(parameter.id);
+				self._editItemCancelInSearchList(parameter.id, parameter.where);
 			},
 			elementMarked: function () {
 				self._markItem(parameter.id, parameter.marked);
 			},
 			elementMarkedInSearchList: function () {
-				self._markItemInSearchList(parameter.id, parameter.marked);
+				self._markItemInSearchList(parameter.id, parameter.marked, parameter.where);
+			},
+			showMarkedList: function () {
+				self.$todoapp.style.display = 'none';
+				self.$search_section.style.display = 'none';
+				self.$marked_section.style.display = 'block';
+				self.$marked_list.innerHTML = self.template.showSearchResults(parameter.categories, parameter.todos);
+			},
+			cancelMarkItemInMarkedList: function () {
+				console.log(parameter.id);
+				console.log(parameter.where);
+				self._removeItemInSearchResults(parameter.id, parameter.where);
+			},
+			showMarkedMenuSelected: function () {
+				if (parameter.selected === true){
+					self.$marked_menu.className = 'selected';
+				}else {
+					self.$marked_menu.className = '';
+				}
 			}
 		};
 
@@ -259,9 +284,28 @@
 			});
 		}else if (event === 'markItemInSearchResult') {
 			$delegate(self.$search_list, 'button', 'click', function () {
-				var marked = self._ifMarked(this);
-				handler({id: self._itemId(this), marked: marked});
-			})
+				handler({id: self._itemId(this)});
+			});
+		}else if (event === 'removeItemInMarkedList') {
+			$delegate(self.$marked_list, '.destroy', 'click', function () {
+				handler({id: self._itemId(this)});
+			});
+		}else if (event === 'toggleItemInMarkedList') {
+			$delegate(self.$marked_list, '.toggle', 'click', function () {
+				handler({id: self._itemId(this), completed: this.checked});
+			});
+		}else if (event === 'editItemInMarkedList') {
+			$delegate(self.$marked_list, 'li label' , 'dblclick', function () {
+				handler({id: self._itemId(this)});
+			});
+		}else if (event === 'itemEditDoneInMarkedList') {
+			self._bindItemEditDoneInMarkedList(handler);
+		}else if (event === 'itemEditCancelInMarkedList') {
+			self._bindItemEditCancelInMarkedList(handler);
+		}else if (event === 'cancelMarkItemInMarkedList') {
+			$delegate(self.$marked_list, 'button', 'click', function () {
+				handler({id: self._itemId(this)});
+			});
 		}
 
 	};
@@ -339,15 +383,30 @@
 		qs('.show_time').style.display = 'block';
 	};
 
-	View.prototype._removeItemInSearchResults = function (id) {
+	View.prototype._removeItemInSearchResults = function (id, where) {
+		console.log(id);
 		var elem = qs('[data-id="' + id + '"]');
-		if (elem) {
+		console.log(elem);
+		if (where === 'searchList') {
+			console.log('where value is searchList');
+			console.log(elem.parentNode);
 			this.$search_list.removeChild(elem);
+		}else if (where === 'markedList') {
+			console.log(elem);
+			console.log(this.$marked_section);
+			console.log(elem.parentNode);
+			this.$marked_list.removeChild(elem);
 		}
 	};
 
-	View.prototype._elementCompleteInSearchList = function (id, completed) {
-		var listItem  = qs('[data-id="' + id + '"]', this.$search_list);
+	View.prototype._elementCompleteInSearchList = function (id, completed, where) {
+		var listItem;
+		if (where === 'searchList') {
+			listItem  = qs('[data-id="' + id + '"]', this.$search_list);
+		} else if (where === 'markedList') {
+			listItem  = qs('[data-id="' + id + '"]', this.$marked_list);
+		}
+
 		if (!listItem) {
 			return;
 		}
@@ -357,8 +416,14 @@
 
 	};
 
-	View.prototype._editItemInSearchList = function (id, title) {
-		var listItem = qs('[data-id = "' + id + '"]', this.$search_list);
+	View.prototype._editItemInSearchList = function (id, title, where) {
+		var listItem;
+		if (where === 'searchList') {
+			listItem = qs('[data-id = "' + id + '"]', this.$search_list);
+		}else if (where === 'markedList') {
+			listItem = qs('[data-id = "' + id + '"]', this.$marked_list);
+		}
+
 		if (!listItem) {
 			return;
 		}
@@ -396,8 +461,14 @@
 		});
 	};
 
-	View.prototype._editItemDoneInSearchList = function (id, title) {
-		var listItem = qs('[data-id = "' + id + '"]', this.$search_list);
+
+	View.prototype._editItemDoneInSearchList = function (id, title, where) {
+		var listItem;
+		if (where === 'searchList') {
+			listItem = qs('[data-id = "' + id + '"]', this.$search_list);
+		}else if (where === 'markedList') {
+			listItem = qs('[data-id = "' + id + '"]', this.$marked_list);
+		}
 		if (!listItem) {
 			return;
 		}
@@ -423,8 +494,13 @@
 		});
 	};
 
-	View.prototype._editItemCancelInSearchList = function (id) {
-		var listItem = qs('[data-id = "' + id + '"]', this.$search_list);
+	View.prototype._editItemCancelInSearchList = function (id, where) {
+		var listItem;
+		if (where === 'searchList') {
+			listItem = qs('[data-id = "' + id + '"]', this.$search_list);
+		}else if (where === 'markedList') {
+			listItem = qs('[data-id = "' + id + '"]', this.$marked_list);
+		}
 		if (!listItem) {
 			return;
 		}
@@ -454,13 +530,57 @@
 		}
 	};
 
-	View.prototype._markItemInSearchList = function (id, marked) {
-		var listItem = qs('[data-id = "' + id + '"]', this.$search_list);
+	View.prototype._markItemInSearchList = function (id, marked, where) {
+		var listItem;
+		if (where === 'searchList') {
+			listItem = qs('[data-id = "' + id + '"]', this.$search_list);
+		} else if (where === 'markedList') {
+			listItem = qs('[data-id = "' + id + '"]', this.$marked_list);
+		}
 		if (!listItem) {
 			return;
 		}
 		var button = qs('button', listItem);
 		button.className = marked? 'marked': 'mark';
+	};
+
+	View.prototype._bindItemEditDoneInMarkedList = function (handler) {
+		var self = this;
+		$delegate(self.$marked_list, 'li .edit', 'blur', function () {
+			if (!this.dataset.iscanceled) {
+				var modify_time = new Date();
+				handler({
+					id: self._itemId(this),
+					title: this.value,
+					modified: modify_time.getFullYear().toString() + "-"
+					+ (modify_time.getMonth() + 1).toString() + "-"
+					+ modify_time.getDate().toString()
+				});
+			}
+		});
+
+		$delegate(self.$marked_list, 'li .edit', 'keypress', function (event) {
+			if (event.keyCode === self.ENTER_KEY) {
+				// Remove the cursor from the input when you hit enter just like if it
+				// were a real form
+				this.blur();
+			}
+		});
+	};
+
+	View.prototype._bindItemEditCancelInMarkedList = function (handler) {
+		var self = this;
+		$delegate(self.$marked_list, 'li .edit', 'keyup', function (event) {
+			if (event.keyCode === self.ESCAPE_KEY) {
+				this.dataset.iscanceled = true;
+				this.blur();
+				handler({id: self._itemId(this)});
+			}
+		});
+	};
+
+	View.prototype.readKeywordInSearchInput = function () {
+		return this.$search_input.value;
 	};
 
 	// Export to window

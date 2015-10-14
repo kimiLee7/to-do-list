@@ -19,7 +19,7 @@
 	var todo = new Todo('allTodos', 'categoryInfo');
 
 	function setView() {
-		todo.controller.setLeftSideBar();
+		todo.controller.setLeftSideBar(document.location.hash);
 	 	todo.controller.setView(document.location.hash);
 	 }
 	 $on(window, 'load', setView);

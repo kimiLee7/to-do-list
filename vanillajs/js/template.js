@@ -78,7 +78,7 @@
 	Template.prototype.show = function (data) {
 		var i, l;
 		var view = '';
-
+		console.log('data length in template.show() is ' + data.length);
 		for (i = 0, l = data.length; i < l; i++) {
 			var template = this.defaultTemplate;
 			var completed = '';
@@ -102,6 +102,8 @@
 			template = template.replace('{{value}}', value);
 			view = view + template;
 		}
+		console.log('returned view in template.show() is ' + view);
+		console.log('returned view type in template.show() is ' + typeof view);
 		return view;
 	};
 
@@ -143,41 +145,52 @@
 
 	Template.prototype.showSearchResults = function (categories, todos) {
 		var view = '';
+		console.log(categories);
+		console.log(todos);
+		console.log('type of categories is' + typeof(categories));
+		if (categories.length === 0 ) {
+			console.log('in if block');
+			view = '<li class= "no_content_text">No Content</li>';
+			return view;
+		} else {
+			for (var i = 0; i < categories.length; i++) {
+				var search_category_view = '';
+				var category_template = this.searchCategoryTemplate;
+				category_template = category_template.replace('{{path}}', '#/category/'+ categories[i]);
+				category_template = category_template.replace('{{category}}', categories[i]);
+				search_category_view = search_category_view + category_template;
+				var search_todos_list_view = '';
+				for (var j = 0; j < todos[categories[i]].length; j++) {
+					var search_todos_template = this.defaultTemplate;
+					var completed = '';
+					var checked = '';
 
-		for (var i = 0; i < categories.length; i++) {
-			var search_category_view = '';
-			var category_template = this.searchCategoryTemplate;
-			category_template = category_template.replace('{{path}}', '#/category/'+ categories[i]);
-			category_template = category_template.replace('{{category}}', categories[i]);
-			search_category_view = search_category_view + category_template;
-			var search_todos_list_view = '';
-			for (var j = 0; j < todos[categories[i]].length; j++) {
-				var search_todos_template = this.defaultTemplate;
-				var completed = '';
-				var checked = '';
+					var marked = 'mark';
+					var value = '0';
 
-				var marked = 'mark';
-				var value = '0';
-				if (todos[categories[i]][j].completed) {
-					completed = 'completed';
-					checked = 'checked';
+					if (todos[categories[i]][j].completed) {
+						completed = 'completed';
+						checked = 'checked';
+					}
+					if (todos[categories[i]][j].marked) {
+						marked = 'marked';
+						value = '1';
+					}
+					search_todos_template = search_todos_template.replace('{{id}}', todos[categories[i]][j].id);
+					search_todos_template = search_todos_template.replace('{{title}}', escape(todos[categories[i]][j].title));
+					search_todos_template = search_todos_template.replace('{{completed}}', completed);
+					search_todos_template = search_todos_template.replace('{{checked}}', checked);
+					search_todos_template = search_todos_template.replace('mark', marked);
+					search_todos_template = search_todos_template.replace('{{value}}', value);
+					search_todos_list_view = search_todos_list_view + search_todos_template;
 				}
-				if (todos[categories[i]][j].marked) {
-					marked = 'marked';
-					value = '1';
-				}
-				search_todos_template = search_todos_template.replace('{{id}}', todos[categories[i]][j].id);
-				search_todos_template = search_todos_template.replace('{{title}}', escape(todos[categories[i]][j].title));
-				search_todos_template = search_todos_template.replace('{{completed}}', completed);
-				search_todos_template = search_todos_template.replace('{{checked}}', checked);
-				search_todos_template = search_todos_template.replace('mark', marked);
-				search_todos_template = search_todos_template.replace('{{value}}', value);
-				search_todos_list_view = search_todos_list_view + search_todos_template;
+				view = view + search_category_view + search_todos_list_view;
 			}
-			view = view + search_category_view + search_todos_list_view;
+			return view;
 		}
-		return view;
+
 	};
+
 
 
 	// Export to window

@@ -23,7 +23,6 @@
 /*
 
 		self.view.bind("getTimeInfo", function(item) {
-			console.log(item.id);
 			self.showTimeInfo(item.id);
 		});
 
@@ -32,7 +31,6 @@
 		});
 */
 		self.view.bind('itemToggle', function (item) {
-			console.log(item.completed);
 			self.toggleComplete(item.id, item.completed);
 		});
 
@@ -77,23 +75,23 @@
 		});
 
 		self.view.bind('removeItemInSearchResult', function (item) {
-			self.removeItemInSearchResults(item);
+			self.removeItemInSearchResults(item.id, 'searchList');
 		});
 
 		self.view.bind('toggleItemInSearchResult', function (item) {
-			self.toggleCompleteInSearchResults(item.id, item.completed);
+			self.toggleCompleteInSearchResults(item.id, item.completed, 'searchList');
 		});
 
 		self.view.bind('editItemInSearchResult', function (item) {
-			self.editItemInSearchResult(item.id);
+			self.editItemInSearchResult(item.id, 'searchList');
 		});
 
 		self.view.bind('itemEditDoneInSearchResult', function (item) {
-			self.itemEditSaveInSearchResult(item.id, item.title, item.modified);
+			self.itemEditSaveInSearchResult(item.id, item.title, item.modified, 'searchList');
 		});
 
 		self.view.bind('itemEditCancelInSearchResult', function (item) {
-			self.itemEditCancelInSearchResult(item.id);
+			self.itemEditCancelInSearchResult(item.id, 'searchList');
 		});
 
 		self.view.bind('markItem', function (item) {
@@ -101,8 +99,36 @@
 		});
 
 		self.view.bind('markItemInSearchResult', function (item) {
-			self.markItemInSearchList(item.id, item.marked);
-		})
+			self.beforeMarkItemInSearchList(item.id, function (data) {
+				self.markItemInSearchList(item.id, !data.marked, 'searchList');
+			});
+		});
+
+		self.view.bind('removeItemInMarkedList', function (item) {
+			self.removeItemInSearchResults(item.id, 'markedList');
+		});
+
+		self.view.bind('toggleItemInMarkedList', function (item) {
+			self.toggleCompleteInSearchResults(item.id, item.completed, 'markedList');
+		});
+
+		self.view.bind('editItemInMarkedList', function (item) {
+			self.editItemInSearchResult(item.id, 'markedList');
+		});
+
+		self.view.bind('itemEditDoneInMarkedList', function (item) {
+			self.itemEditSaveInSearchResult(item.id, item.title, item.modified, 'markedList')
+		});
+
+		self.view.bind('itemEditCancelInMarkedList', function (item) {
+			self.itemEditCancelInSearchResult(item.id, 'markedList');
+		});
+
+		self.view.bind('cancelMarkItemInMarkedList', function (item) {
+			self.model.updateInSearchResults({marked: false}, item.id, function () {
+				location.reload(false);
+			});
+		});
 	}
 
 
@@ -144,9 +170,7 @@
 		var self = this;
 		self.model.read({id: id}, function (data) {
 			var remove_array_of_data = JSON.stringify(data[0]);
-			console.log(remove_array_of_data);
 			var be_json_data = JSON.parse(remove_array_of_data);
-			console.log(be_json_data.created);
 			self.view.render("showTimeInfo", {created:be_json_data.created, modified: be_json_data.modified});
 		});
 	};
@@ -187,7 +211,9 @@
 				completed: todos.completed,
 				visible: todos.completed > 0
 			});
-
+			console.log('total todos is ' + todos.total);
+			console.log('completed todo is ' + todos.completed);
+			console.log('active todo is ' + todos.active);
 			self.view.render('toggleAll', {checked: todos.completed === todos.total});
 			self.view.render('contentBlockVisibility', {visible: todos.total > 0});
 		});
@@ -384,10 +410,21 @@
 
 	//author xiaomin
 
-	Controller.prototype.setLeftSideBar = function () {
+	Controller.prototype.setLeftSideBar = function (locationHash) {
+		var page;
+		var route1;
+		var route2;
+		route1 = locationHash.split('/')[1];
+		route2 = locationHash.split('/')[2];
+
+		if (route1 === undefined) {
+			page = '';
+		}else if (route1 == 'category') {
+			page = route2 || '';
+		}
 		var self = this;
 		self.model.getCategoryInfo(function (data) {
-			self.view.render('showLeftSideBar', data);
+			self.view.render('showLeftSideBar', {category: page, data: data});
 		})
 	};
 
@@ -395,35 +432,54 @@
 		var page;
 		var route1;
 		var route2;
-		if (locationHash == '') {
-		    page = '';
-			route1 = 'category';
-		} else {
-			route1 = locationHash.split('/')[1];
-			route2 = locationHash.split('/')[2];
-		    page = route2 || '';
-		}
-		if (route1 == 'category') {
+		route1 = locationHash.split('/')[1];
+		route2 = locationHash.split('/')[2];
+		console.log(locationHash);
+		console.log(route1);
+		console.log(route2);
+		if (route1 === undefined) {
+			page = '';
+			this._updateMarkedMenuBgColor({selected: false});
 			this.showCurrentCategory(page);
 			this.updateTodoContent(page);
-		}/*else if (route1 == 'search') {
-			this.search(this.view.getKeyword());
-		}*/
+		} else if (route1 == 'category') {
+			page = route2 || '';
+			this._updateMarkedMenuBgColor({selected: false});
+			this.showCurrentCategory(page);
+			if (page !== 'Marked_list')  {
+				this.updateTodoContent(page);
+			} else if (page === 'Marked_list') {
+				this._updateMarkedMenuBgColor({selected: true});
+			 	this.showMarkedList();
+			}
+		} else if (route1 === 'search') {
+			this._updateMarkedMenuBgColor({selected: false});
+			var keyword = this.view.readKeywordInSearchInput();
+			this.search(keyword);
+		}
 	};
 
 	Controller.prototype.updateTodoContent = function (page) {
 		var self = this;
+		if (page === '') {
+			self.model.getCategoryInfo(function (categories) {
+				page = categories[0];
+			});
+		}
+
 		self.model.read(page, function(data) {
+			console.log('returned data from db in model.read() is ' + data);
 			self.view.render('showEntries', data);
 		});
 		self._updateCount(page);
 	};
 
+
 	// show current category on the left of top menu bar
 	Controller.prototype.showCurrentCategory = function (category) {
 		var self = this;
 		if (category == '') {
-			self.model.getFirstCategory(function (data) {
+			self.model.getFirstCategoryData(function (data) {
 				self.view.render('showCurrentCategory', data);
 			});
 		} else {
@@ -435,6 +491,7 @@
 	Controller.prototype.search = function (keyword) {
 		var self = this;
 		self.model.readMatch(keyword, function (data) {
+			console.log('return data from db is' + data);
 			self.view.render('showSearchResults',data);
 		});
 	};
@@ -447,41 +504,43 @@
 		});
 	};
 
-	Controller.prototype.removeItemInSearchResults = function (query) {
+	Controller.prototype.removeItemInSearchResults = function (id, where) {
 		var self = this;
-		self.model.removeAItemInAllCategories(query, function () {
-			self.view.render('removeInSearchList', query);
+		self.model.removeAnItemInAllCategories({id: id}, function () {
+			self.view.render('removeInSearchList', {id: id, where: where});
 		});
 	};
 
-	Controller.prototype.toggleCompleteInSearchResults = function (id, completed) {
+	Controller.prototype.toggleCompleteInSearchResults = function (id, completed, where) {
 		var self = this;
 		self.model.updateInSearchResults({completed: completed}, id, function () {
-			self.view.render('toggleCompleteInSearchList', {id: id, completed: completed});
+			self.view.render('toggleCompleteInSearchList', {id: id, completed: completed, where: where});
 		});
 	};
 
-	Controller.prototype.editItemInSearchResult = function (id) {
+	Controller.prototype.editItemInSearchResult = function (id, where) {
 		var self = this;
 		self.model.findAnItemInAllCategories(id, function (item) {
-			self.view.render('editItemInSearchList', {id: item.id, title: item.title});
+			self.view.render('editItemInSearchList', {id: item.id, title: item.title, where: where});
 		});
 	};
 
-	Controller.prototype.itemEditSaveInSearchResult = function (id, title, modified) {
+	Controller.prototype.itemEditSaveInSearchResult = function (id, title, modified, where) {
 		var self = this;
 		title = title.trim();
 		if (title.length != 0){
 			self.model.updateInSearchResults({title: title, modified: modified}, id, function () {
-				self.view.render('editItemDoneInSearchList', {title: title, id: id });
+				self.view.render('editItemDoneInSearchList', {title: title, id: id, where: where });
 			});
-		}else{
-			self.removeItemInSearchResults({id: id});
+		}else if (title.length == 0 && where === 'searchList'){
+			self.removeItemInSearchResults(id, 'searchList');
+		}else if (title.length == 0 && where === 'markedList') {
+			self.removeItemInSearchResults(id, 'markedList');
 		}
 	};
 
-	Controller.prototype.itemEditCancelInSearchResult = function (id) {
-		this.view.render('editItemCancelInSearchList', {id: id});
+	Controller.prototype.itemEditCancelInSearchResult = function (id, where) {
+		this.view.render('editItemCancelInSearchList', {id: id, where: where});
 	};
 
 	Controller.prototype.markItem = function (id, marked, silent) {
@@ -500,14 +559,41 @@
 		}
 	};
 
-	Controller.prototype.markItemInSearchList = function (id, marked) {
+	Controller.prototype.beforeMarkItemInSearchList = function (id, callback) {
+		this.model.findAnItemInAllCategories(id, callback);
+	};
+
+	Controller.prototype.markItemInSearchList = function (id, marked, where) {
 		var self = this;
 		self.model.updateInSearchResults({marked: marked}, id, function () {
 			self.view.render('elementMarkedInSearchList', {
 				id: id,
-				marked: marked
+				marked: marked,
+				where: where
 			});
 		})
+	};
+
+	//show marked todos in marked list
+	Controller.prototype.showMarkedList = function () {
+		var self = this;
+		self.model.findItemsInAllCategories({marked: true}, function (data) {
+			self.view.render('showMarkedList', data);
+		});
+	};
+
+	//remove marked item in marked list (unmark)
+	Controller.prototype.cancelMarkItemInMarkedList = function (id, marked, where) {
+		var self = this;
+		console.log('!marked is ' + marked);
+		self.model.updateInSearchResults({marked: marked}, id, function () {
+			console.log('start to callback');
+			self.view.render('cancelMarkItemInMarkedList', {id: id, where: where});
+		});
+	};
+
+	Controller.prototype._updateMarkedMenuBgColor = function (ifSelected) {
+		this.view.render('showMarkedMenuSelected', ifSelected);
 	};
 
 	// Export to window

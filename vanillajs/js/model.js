@@ -95,6 +95,11 @@
 		};
 
 		this.storage.findAll(category, function (data) {
+/*			if (data === undefined) {
+				data = [];
+			}*/
+			console.log('returned data from storage.findAll() in model.count() is ' + data);
+			console.log('will call data.forEach() after data is returned');
 			data.forEach(function (todo) {
 				if (todo.completed) {
 					todos.completed++;
@@ -113,8 +118,8 @@
 		this.storage.readCategoryInfo(callback);
 	};
 
-	Model.prototype.getFirstCategory = function (callback) {
-		this.storage.readFirstCategory(callback);
+	Model.prototype.getFirstCategoryData = function (callback) {
+		this.storage.readFirstCategoryData(callback);
 	};
 
 	Model.prototype.readMatch = function (keyword, callback) {
@@ -125,8 +130,8 @@
 		this.storage.sort(category, callback);
 	};
 
-	Model.prototype.removeAItemInAllCategories = function (query, callback) {
-		this.storage.removeAItemInAllCategories(query, callback);
+	Model.prototype.removeAnItemInAllCategories = function (query, callback) {
+		this.storage.removeAnItemInAllCategories(query, callback);
 	};
 
 	Model.prototype.updateInSearchResults = function (updateData, id, callback) {
@@ -135,6 +140,10 @@
 
 	Model.prototype.findAnItemInAllCategories = function (id, callback) {
 		this.storage.findAnItemInAllCategories(id, callback);
+	};
+
+	Model.prototype.findItemsInAllCategories = function (condition, callback) {
+		this.storage.findItemsInAllCategories(condition, callback);
 	};
 
 	// Export to window

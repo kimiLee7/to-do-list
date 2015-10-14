@@ -40,9 +40,14 @@
 
 		if (!localStorage[name] || !localStorage[category_name]) {
 			var category_data = {
-				categories: ['Shopping List', 'Travel', 'Trival Matters']
+				categories: ['ShoppingList', 'Travel', 'TrivalMatters']
 			};
+			var categories = category_data.categories;
+			console.log(categories.length);
 			var todo_data = {};
+			for (var i = 0; i < categories.length; i++) {
+				todo_data[categories[i]] = [];
+			}
 			localStorage[category_name] = JSON.stringify(category_data);
 			localStorage[name] = JSON.stringify(todo_data);
 		}
@@ -93,14 +98,11 @@
 
 	//================================重写findAll=====================
 	Store.prototype.findAll = function (category, callback) {
-		if (category == ''){
-			category = JSON.parse(localStorage[this._dbName2]).categories[0];
 			callback = callback || function () {};
+			console.log('returned data in store.findAll() is ' + JSON.parse(localStorage[this._dbName1])[category]);
+			console.log('returned data type in store.findAll() is ' + typeof JSON.parse(localStorage[this._dbName1])[category]);
 			callback.call(this, JSON.parse(localStorage[this._dbName1])[category]);
-		}else{
-			callback = callback || function () {};
-			callback.call(this, JSON.parse(localStorage[this._dbName1])[category]);
-		}
+
 	};
 
 
@@ -173,7 +175,7 @@
 		callback.call(this, JSON.parse(localStorage[this._dbName2]).categories);
 	};
 
-	Store.prototype.readFirstCategory = function (callback) {
+	Store.prototype.readFirstCategoryData = function (callback) {
 		callback = callback || function () {};
 		callback.call(this, JSON.parse(localStorage[this._dbName2]).categories[0] );
 	};
@@ -185,11 +187,13 @@
 	 */
 
 	Store.prototype.findMatch = function (keyword, callback) {
+		console.log('In function findMatch');
 		callback = callback || function () {};
 		var categories = JSON.parse(localStorage[this._dbName2]).categories;
 		var allTodos = JSON.parse(localStorage[this._dbName1]);
 		var matchCategories = [];
 		var matchTodos = {};
+
 		for (var i = 0; i < categories.length; i++) {
 			var eachCategoryTodos = allTodos[categories[i]];
 			matchTodos[categories[i]] = [];
@@ -200,17 +204,27 @@
 				}
 			}
 		}
-		// 给数组 matchCategories 去重
-		var sorted = matchCategories.sort();
-		var result = [];
-		result.push(sorted[0]);
-		for (var k = 1; k < matchCategories.length; k++) {
-			if (sorted[k] !== result[result.length -1]) {
-				result.push(sorted[k]);
-			}
+		//这里有点投机取巧，后续改进
+		if (keyword === ''){
+			matchCategories = [];
 		}
 
-		callback.call(this, {categories: result, todos: matchTodos});
+		if (matchCategories.length === 0) {
+			callback.call(this,{categories: [], todos: matchTodos} );
+		} else {
+			// 给数组 matchCategories 去重
+			var sorted = matchCategories.sort();
+			var result = [];
+			result.push(sorted[0]);
+			for (var k = 1; k < matchCategories.length; k++) {
+				if (sorted[k] !== result[result.length -1]) {
+					result.push(sorted[k]);
+				}
+			}
+
+			callback.call(this, {categories: result, todos: matchTodos});
+		}
+
 	};
 
 	Store.prototype.sort = function (category, callback) {
@@ -232,7 +246,7 @@
 		callback.call(this, sortedTodos);
 	};
 
-	Store.prototype.removeAItemInAllCategories = function (query, callback) {
+	Store.prototype.removeAnItemInAllCategories = function (query, callback) {
 		callback = callback || function () {};
 		var categories = JSON.parse(localStorage[this._dbName2]).categories;
 		var data = JSON.parse(localStorage[this._dbName1]);
@@ -254,7 +268,7 @@
 		var data = JSON.parse(localStorage[this._dbName1]);
 		for (var i = 0; i < categories.length; i++) {
 			for (var j = 0; j < data[categories[i]].length; j++) {
-				if (data[categories[i]][j].id == id) {
+				if (data[categories[i]][j].id === id) {
 					for (var key in updateData) {
 						data[categories[i]][j][key] = updateData[key];
 					}
@@ -262,6 +276,7 @@
 				}
 			}
 		}
+		console.log(data);
 		localStorage[this._dbName1] = JSON.stringify(data);
 		callback.call(this, JSON.parse(localStorage[this._dbName1]));
 	};
@@ -279,9 +294,49 @@
 				}
 			}
 		}
+		console.log('find item is ' + todo[0]);
 		callback.call(this, todo[0]);
 	};
 
+	Store.prototype.findItemsInAllCategories = function (condition, callback) {
+		console.log('in findItemsInAllCategories function');
+		callback = callback || function () {};
+		var categories = JSON.parse(localStorage[this._dbName2]).categories;
+		var allTodos = JSON.parse(localStorage[this._dbName1]);
+		var matchCategories = [];
+		var matchTodos = {};
+		console.log(matchCategories);
+		for (var i = 0; i < categories.length; i++) {
+			var eachCategoryTodos = allTodos[categories[i]];
+			matchTodos[categories[i]] = [];
+			console.log('index ' + i + ' matchCategories value is' + matchCategories);
+			for (var j = 0; j < eachCategoryTodos.length; j++) {
+				for (var key in condition){
+					if (eachCategoryTodos[j][key] == condition[key]){
+						matchCategories.push(categories[i]);
+						matchTodos[categories[i]].push(eachCategoryTodos[j]);
+					}
+				}
+			}
+		}
+
+		console.log('matchCategories is ' + matchCategories);
+		if (matchCategories.length === 0) {
+			console.log('in if block');
+			callback.call(this, {categories: [], todos: matchTodos})
+		} else {
+			// 给数组 matchCategories 去重
+			var sorted = matchCategories.sort();
+			var result = [];
+			result.push(sorted[0]);
+			for (var k = 1; k < matchCategories.length; k++) {
+				if (sorted[k] !== result[result.length -1]) {
+					result.push(sorted[k]);
+				}
+			}
+			callback.call(this, {categories: result, todos: matchTodos});
+		}
+	};
 
 	// Export to window
 	window.app = window.app || {};

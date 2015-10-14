@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="css/index-xm.css">
     <link rel="stylesheet" href="css/extended.css">
 </head>
-<body>
+<>
     <div id="left_side_bar">
         <div id="search_bar">
             <input type="text" placeholder="please enter title   ">
@@ -18,33 +18,15 @@
             <div class="profile_icon"></div>
             <span>xiaomin</span>
         </div>
+        <ul class="left_menu_marked">
+            <li>
+                <a href="#/category/Marked_list">
+                    <img src="images/marked_list.png" alt="marked_list_icon" width="25px" height="18px"/>
+                    <span class="title">Marked List</span>
+                </a>
+            </li>
+        </ul>
         <ul class="left_menu_list">
-            <!--<li>
-                <a>
-                    <img src="images/mark_icon.png" alt="mark icon" width="20px" height="20px"/>
-                    <span class="title">Marked Tasks</span>
-                </a>
-            </li>-->
-<!--
-            <li>
-                <a>
-                    <img src="images/menu.png" alt="todo-list icon" width="20px" height="15px"/>
-                    <span class="title">Shopping List</span>
-                </a>
-            </li>
-            <li>
-                <a>
-                    <img src="images/menu.png" alt="todo-list icon" width="20px" height="15px"/>
-                    <span class="title">Travel</span>
-                </a>
-            </li>
-            <li>
-                <a>
-                    <img src="images/menu.png" alt="todo-list icon" width="20px" height="15px"/>
-                    <span class="title">Living</span>
-                </a>
-            </li>
-            -->
         </ul>
     </div>
     <div id="top_menu_bar">
@@ -61,7 +43,7 @@
             <h1>todos</h1>
             <input class="new-todo" placeholder="What needs to be done?" autofocus>
         </header>
-        <section style="display: block;" class="main">
+        <section  class="main">
             <input class="toggle-all" type="checkbox">
             <label for="toggle-all">Mark all as complete</label>
             <ul class="todo-list"></ul>
@@ -80,19 +62,13 @@
                 </li>
             </ul>
             <button class="clear-completed">Clear completed</button>
-            <!--
-            <footer class="info">
-                <p>Double-click to edit a todo</p>
-                <p>Created by <a href="http://twitter.com/oscargodson">Oscar Godson</a></p>
-                <p>Refactored by <a href="https://github.com/cburgmer">Christoph Burgmer</a></p>
-                <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
-            </footer>
-            -->
-
         </footer>
     </section>
     <section class="search_results">
         <ul class="search_tasks_list"></ul>
+    </section>
+    <section class="marked_list_section">
+        <ul class="marked_list"></ul>
     </section>
     <script src="js/helpers.js"></script>
     <script src="js/store.js"></script>

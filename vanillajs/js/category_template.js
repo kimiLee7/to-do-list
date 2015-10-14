@@ -7,7 +7,7 @@
 
     function Category_Template() {
         this.defaultCategory_template
-        = '<li>'
+        = '<li class="{{selected}}">'
         +   '<a href="{{path}}">'
         +       '<img src="images/menu.png" alt="todo-list icon" width="20px" height="15px"/>'
         +       '<span class="title">{{title}}</span>'
@@ -15,10 +15,17 @@
         + '</li>';
     }
 
-    Category_Template.prototype.show = function (data) {
+    Category_Template.prototype.show = function (selectedCategory, data) {
         var view = '';
+        if (selectedCategory === '') {
+            selectedCategory = data[0];
+        }
         for (var i = 0; i < data.length; i++) {
             var template = this.defaultCategory_template;
+            if (selectedCategory === data[i]) {
+                template = template.replace('{{selected}}', 'selected');
+                console.log('one left menu is selected, bgColor should be changed');
+            }
             template = template.replace('{{path}}', '#/category/' + data[i]);
             template = template.replace('{{title}}', data[i]);
             view = view + template;

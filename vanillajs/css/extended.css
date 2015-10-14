@@ -53,6 +53,41 @@
     font-size: 15px;
 }
 
+.left_menu_marked {
+    margin: 0;
+    padding: 0;
+}
+
+.left_menu_marked li {
+    list-style: none;
+}
+
+.left_menu_marked li a {
+    display: block;
+    padding-left: 13px;
+    height: 45px;
+    line-height: 45px;
+    cursor: pointer;
+}
+
+.left_menu_marked li .title {
+    padding-left: 8px;
+}
+
+.left_menu_marked li a:link {
+    text-decoration: none;
+    color: #000;
+}
+
+.left_menu_marked li a:visited {
+    text-decoration: none;
+    color: #000;
+}
+
+.left_menu_marked li a:hover {
+    color: #000;
+}
+
 .left_menu_list {
     margin: 0;
     padding: 0;
@@ -81,13 +116,6 @@
 }
 
 .left_menu_list li a:hover {
-    background-color: #bfbfbf;
-    color: #000;
-}
-
-.left_menu_list li a:active {
-    background-color: aquamarine;
-    text-decoration: none;
     color: #000;
 }
 
@@ -344,6 +372,186 @@
     content: '\2605';
     color: #af5b5e;
 }
+
+.marked_list_section {
+    display: none;
+    background: #fff;
+    width: 75%;
+    /*margin: 120px auto 40px auto;*/
+    margin-top: 160px;
+    margin-left: 300px;
+    position: relative;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2),
+    0 25px 50px 0 rgba(0, 0, 0, 0.1);
+}
+
+.marked_list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.marked_list li {
+    position: relative;
+    font-size: 24px;
+    border-bottom:1px solid #ededed;
+    list-style: none;
+}
+
+.marked_list li:last-child {
+    border-bottom: none;
+}
+
+.marked_list .show_category {
+    display: block;
+    margin: 10px 0;
+    border-bottom: none;
+}
+
+.marked_list li a {
+    display: block;
+    padding: 10px 0;
+    color: #000;
+    text-decoration: none;
+    background-color: #b83f45;
+}
+
+.marked_list li label {
+    white-space: pre;
+    word-break: break-word;
+    padding: 15px 85px 15px 15px;
+    margin-left: 70px;
+    display: block;
+    line-height: 1.2;
+}
+
+.marked_list li.completed label {
+    color: #d9d9d9;
+    text-decoration: line-through;
+}
+
+.marked_list li .toggle {
+    text-align: center;
+    width: 40px;
+    /* auto, since non-WebKit browsers doesn't support input styling */
+    height: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+    border: none; /* Mobile Safari */
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.marked_list li .toggle:after {
+    content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-10 -18 100 135"><circle cx="50" cy="50" r="50" fill="none" stroke="#ededed" stroke-width="3"/></svg>');
+}
+
+.marked_list li .toggle:checked:after {
+    content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-10 -18 100 135"><circle cx="50" cy="50" r="50" fill="none" stroke="#bddad5" stroke-width="3"/><path fill="#5dc2af" d="M72 25L42 71 27 56l-4 4 20 20 34-52z"/></svg>');
+}
+
+.marked_list li .destroy {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 10px;
+    bottom: 0;
+    width: 40px;
+    height: 40px;
+    margin: auto 0;
+    font-size: 30px;
+    color: #cc9a9a;
+    margin-bottom: 11px;
+    transition: color 0.2s ease-out;
+}
+
+.marked_list li .destroy:hover {
+    color: #af5b5e;
+}
+
+.marked_list li .destroy:after {
+    content: '×';
+}
+
+.marked_list li:hover .destroy {
+    display: block;
+}
+
+.marked_list li.editing {
+    border-bottom: none;
+    padding: 0;
+}
+
+.marked_list li.editing .edit {
+    display: block;
+    width: 800px;
+    padding: 13px 17px 12px 17px;
+    margin: 0 0 0 43px;
+}
+
+.marked_list li.editing .view {
+    display: none;
+}
+
+.marked_list li.edit {
+    display: none;
+}
+
+.marked_list li.editing:last-child {
+    margin-bottom: -1px;
+}
+
+.marked_list li .mark {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 45px;
+    bottom: 0;
+    width: 40px;
+    height: 40px;
+    margin: auto 0;
+    margin-bottom: 11px;
+}
+
+.marked_list li:hover .mark {
+    display: block;
+}
+
+.marked_list li .mark:after {
+    content: '\2606';
+    color: #af5b5e;
+}
+
+.marked_list li .marked {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 45px;
+    bottom: 0;
+    width: 40px;
+    height: 40px;
+    margin: auto 0;
+    margin-bottom: 11px;
+}
+
+.marked_list li:hover .marked {
+    display: block;
+}
+
+.marked_list li .marked:after {
+    content: '\2605';
+    color: #af5b5e;
+}
+
+.left_menu_list li.selected,
+.left_menu_marked li.selected {
+    background-color: #bfbfbf;
+}
+
+
+
 
 
 
